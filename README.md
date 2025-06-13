@@ -1,7 +1,7 @@
 # Deprecated Params 
 
 Inspired after python's warning.deprecated wrapper, deprecated_params is made to serve the single purpose of deprecating parameter names to warn users
-about incoming changes as well as retain typehinting.
+about incoming changes as well as retaining typehinting.
 
 
 
