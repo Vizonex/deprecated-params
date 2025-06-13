@@ -29,6 +29,6 @@ class MyClass:
         self.spam = spam
         self.foo = kw.get("foo", None)
 
-# DeprecationWarning: foo is deprecated
+# DeprecationWarning: foo was removed in ... don't use it
 mc = MyClass("spam", foo="X")
 ```
