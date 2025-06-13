@@ -1,0 +1,52 @@
+import pytest
+from deprecated_params import deprecated_params
+
+
+# should carry w x y
+def test_deprecated_param():
+    @deprecated_params(["x"], "is deprecated")
+    def my_func(w: int, *, x: int = None, y: int = None):
+        pass
+
+    with pytest.warns(DeprecationWarning, match='Parameter "x" is deprecated'):
+        my_func(0, x=0)
+
+
+def test_class_wrapper_and_kw_display_disabled():
+    @deprecated_params(["foo"], "foo is deprecated", display_kw=False)
+    class MyClass:
+        def __init__(self, spam: object, *, foo: object = None):
+            self.spam = spam
+            self.foo = foo
+
+    mc = MyClass("spam")
+    assert mc.spam == "spam"
+    assert mc.foo == None
+
+    with pytest.warns(DeprecationWarning, match="foo is deprecated"):
+        MyClass("spam", foo="foo")
+
+
+class TornadoWarning(DeprecationWarning):
+    pass
+
+
+def test_dataclasses_with_wrapper_message_dicts_custom_warning():
+    from dataclasses import dataclass, field
+
+    @deprecated_params(
+        ["foo"],
+        {"foo": "got foo", "spam": "got spam"},
+        display_kw=False,
+        category=TornadoWarning,
+    )
+    @dataclass
+    class Class:
+        foo: str | None = field(kw_only=True, default=None)
+        spam: str | None = field(kw_only=True, default=None)
+
+    with pytest.warns(TornadoWarning, match="got foo"):
+        Class(foo="foo")
+
+
+# TODO: Metaclasses...

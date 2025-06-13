@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools"]
+
+[project]
+name = "deprecated-params"
+version = "0.1.0"
+description = "A Wrapper for functions, class objects and methods for deprecating keyword parameters"
+readme = "README.md"
+authors = [
+    { name = "Vizonex" },
+]
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = [
+    'typing-extensions; python_version<"3.10"'
+]
+
