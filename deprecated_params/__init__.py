@@ -25,8 +25,8 @@ else:
     from typing import ParamSpec
 
 
-__version__ = "0.1.2"
-__license__ = "Appache 2.0"
+__version__ = "0.1.1"
+__license__ = "Appache 2.0 / MIT"
 
 
 _T = TypeVar("_T", covariant=True)
