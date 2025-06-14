@@ -228,8 +228,9 @@ class deprecated_params:
             # Python Comment: We need slightly different behavior if __init_subclass__
             # is a bound method (likely if it was implemented in Python)
             if isinstance(original_init_subclass, MethodType):
-                self.__check_for_missing_kwds(original_init_subclass)
-
+                self.__check_for_missing_kwds(
+                    original_init_subclass, missing, invalid_params, skip_missing, allow_miss=True
+                )
                 original_init_subclass = original_init_subclass.__func__
 
                 @functools.wraps(original_init_subclass)
