@@ -1,4 +1,7 @@
 # Deprecated Params 
+[![PyPI version](https://badge.fury.io/py/deprecated-params.svg)](https://badge.fury.io/py/deprecated-params)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/deprecated-params)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Inspired after python's warning.deprecated wrapper, deprecated_params is made to serve the single purpose of deprecating parameter names to warn users
 about incoming changes as well as retaining typehinting.
