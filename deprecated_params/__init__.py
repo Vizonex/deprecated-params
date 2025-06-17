@@ -135,7 +135,7 @@ class deprecated_params:
                 p = sig.parameters.get(m) # type: ignore
                 if p is None:
                     continue
-            print(p.kind, p.name)
+            
             # Check if were keyword only or aren't carrying a default param
             if p.kind != KEYWORD_ONLY:
                 # Anything this isn't a keyword should be considered as deprecated
