@@ -4,9 +4,6 @@ Deprecated Params
 
 A Library dedicated for warning users about deprecated paramter
 names and changes
-
-
-
 """
 
 from __future__ import annotations
@@ -14,7 +11,7 @@ from __future__ import annotations
 import inspect
 import sys
 import warnings
-import functools
+from functools import wraps
 import inspect
 from types import MethodType
 from typing import Callable, Sequence, TypeVar, Mapping, overload
@@ -25,7 +22,7 @@ else:
     from typing import ParamSpec
 
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __license__ = "Appache 2.0 / MIT"
 
 
@@ -185,11 +182,12 @@ class deprecated_params:
     def __call__(self, arg: Callable[_P, _T]) -> Callable[_P, _T]: ...
 
     # Mirrors python's deprecated wrapper with a few changes
-    def __call__(self, arg):
+    def __call__(self, arg: type[_T] | Callable[_P, _T]) -> type[_T] | Callable[_P, _T]:
         not_dispatched = self.params.copy()
 
-        @functools.wraps(not_dispatched)
+
         def check_kw_arguments(kw: dict):
+            nonlocal not_dispatched
             if not_dispatched:
                 for k in kw.keys():
                     print(k, not_dispatched)
@@ -203,7 +201,7 @@ class deprecated_params:
             # solve deprecation of both new_args and init_args
 
             missing, invalid_params, skip_missing = self.__check_with_missing(
-                arg.__init__, allow_miss=True
+                arg, allow_miss=True
             )
 
             original_new = arg.__new__
@@ -211,7 +209,7 @@ class deprecated_params:
                 original_new, missing, invalid_params, skip_missing, allow_miss=True
             )
 
-            @functools.wraps(original_new)
+            @wraps(original_new)
             def __new__(cls, /, *args, **kwargs):
                 check_kw_arguments(kwargs)
                 if original_new is not object.__new__:
@@ -222,7 +220,7 @@ class deprecated_params:
                 else:
                     return original_new(cls)
 
-            arg.__new__ = staticmethod(__new__)
+            arg.__new__ = staticmethod(__new__)  # type: ignore
 
             original_init_subclass = arg.__init_subclass__
             # Python Comment: We need slightly different behavior if __init_subclass__
@@ -233,22 +231,22 @@ class deprecated_params:
                 )
                 original_init_subclass = original_init_subclass.__func__
 
-                @functools.wraps(original_init_subclass)
+                @wraps(original_init_subclass)
                 def __init_subclass__(*args, **kwargs):
                     check_kw_arguments(kwargs)
                     return original_init_subclass(*args, **kwargs)
 
-                arg.__init_subclass__ = classmethod(__init_subclass__)
+                arg.__init_subclass__ = classmethod(__init_subclass__)  # type: ignore
             # Python Comment: Or otherwise, which likely means it's a builtin such as
             # object's implementation of __init_subclass__.
             else:
 
-                @functools.wraps(original_init_subclass)
+                @wraps(original_init_subclass)
                 def __init_subclass__(*args, **kwargs):
                     check_kw_arguments(kwargs)
                     return original_init_subclass(*args, **kwargs)
 
-                arg.__init_subclass__ = __init_subclass__
+                arg.__init_subclass__ = __init_subclass__  # type: ignore
 
             return arg
 
@@ -256,7 +254,7 @@ class deprecated_params:
             # Check for missing functon arguments
             self.__check_for_missing_kwds(arg)
 
-            @functools.wraps(arg)
+            @wraps(arg)
             def wrapper(*args, **kwargs):
                 check_kw_arguments(kwargs)
                 return arg(*args, **kwargs)

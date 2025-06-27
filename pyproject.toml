@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "deprecated-params"
-version = "0.1.2"
+version = "0.1.3"
 description = "A Wrapper for functions, class objects and methods for deprecating keyword parameters"
 readme = "README.md"
 authors = [

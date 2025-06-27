@@ -1,0 +1,8 @@
+# obviously can't have that
+__pycache__
+
+# virtual enviornments
+.venv
+.pytest_cache
+.mypy_cache
+*.egg-info
