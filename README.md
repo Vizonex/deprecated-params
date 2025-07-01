@@ -35,3 +35,13 @@ class MyClass:
 # DeprecationWarning: foo was removed in ... don't use it
 mc = MyClass("spam", foo="X")
 ```
+
+## Why I wrote Deprecated Params
+I got tired of throwing random warnings in my code and wanted something cleaner that didn't 
+interfear with a function's actual code. After figuring out that the functionality 
+I was looking for didn't exist I took the opportunity to do so and is now used with two of my own
+libraries now utilize deprecared-params by default. 
+- aiothreading Lots of interior changes were made and with many arguments being dropped warning developers was perhaps the best solution/
+- aiocallback Same situation as aiothreading but I decided to buy users more time due to how fast some releases were going and it allowed 
+me to experiemnt with this library. 
+
