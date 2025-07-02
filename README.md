@@ -38,12 +38,22 @@ mc = MyClass("spam", foo="X")
 
 ## Why I wrote Deprecated Params
 I got tired of throwing random warnings in my code and wanted something cleaner that didn't 
-interfear with a function's actual code. After figuring out that the functionality 
-I was looking for didn't exist I took the opportunity to do so and is now used with two of my own
-libraries now utilize deprecared-params by default. 
-- aiothreading
-  - Lots of interior changes were made and with many arguments being dropped warning developers was perhaps the best solution/
-- aiocallback
-  - Same situation as aiothreading but I decided to buy users more time due to how fast some releases were going and it allowed
-me to experiemnt with this library. 
+interfear with a function's actual code and didn't blind anybody trying to go through it. 
+Contributors and Reviewers should be able to utilize a library that saves them from this problems.
+After figuring out that the functionality I was looking for didn't exist I took the opportunity 
+to do so.
+
+## Deprecated Params used in real-world Examples 
+Deprecated-params is now used with two of my own libraries by default. 
+
+- [aiothreading](https://github.com/Vizonex/aiothreading)
+  - Originally aiothreading had it's own wrapper but I split it off to this library along with a rewrite after finding out that
+    parameter names were not showing up ides such as vs-code. The rewrite felt a bit bigger and knowing that users would want to utilize
+    this concept in other places was how this library ultimately got started.
+  - Lots of interior changes were made and with many arguments being suddenly dropped to increase the performance, the best solution was to warn
+    developers to stop using certain paramaters as they will be deleted in the future.
+
+- [aiocallback](https://github.com/Vizonex/aiocallback)
+  - Same situation as aiothreading but I decided to buy users more time due to how fast some releases were going and it also allowed
+me to experiemnt with this library to ensure that it was working correctly.
 
