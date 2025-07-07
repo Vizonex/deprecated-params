@@ -22,7 +22,7 @@ else:
     from typing import ParamSpec
 
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __license__ = "Appache 2.0 / MIT"
 
 
