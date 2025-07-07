@@ -129,10 +129,10 @@ class deprecated_params:
             if not allow_miss:
                 p = sig.parameters[m]
             else:
-                p = sig.parameters.get(m) # type: ignore
+                p = sig.parameters.get(m)  # type: ignore
                 if p is None:
                     continue
-            
+
             # Check if were keyword only or aren't carrying a default param
             if p.kind != KEYWORD_ONLY:
                 # Anything this isn't a keyword should be considered as deprecated
@@ -185,7 +185,6 @@ class deprecated_params:
     def __call__(self, arg: type[_T] | Callable[_P, _T]) -> type[_T] | Callable[_P, _T]:
         not_dispatched = self.params.copy()
 
-
         def check_kw_arguments(kw: dict):
             nonlocal not_dispatched
             if not_dispatched:
@@ -227,7 +226,11 @@ class deprecated_params:
             # is a bound method (likely if it was implemented in Python)
             if isinstance(original_init_subclass, MethodType):
                 self.__check_for_missing_kwds(
-                    original_init_subclass, missing, invalid_params, skip_missing, allow_miss=True
+                    original_init_subclass,
+                    missing,
+                    invalid_params,
+                    skip_missing,
+                    allow_miss=True,
                 )
                 original_init_subclass = original_init_subclass.__func__
 

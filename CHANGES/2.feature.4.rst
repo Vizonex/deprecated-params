@@ -1,0 +1,1 @@
+keywords property in thown exceptions is now a :class:`frozenset` ensuring users cannot edit it -- by :user:`Vizonex`
