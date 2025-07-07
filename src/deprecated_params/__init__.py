@@ -42,15 +42,18 @@ __all__ = (
 
 class _KeywordsBaseException(Exception):
     def __init__(self, keywords: set[str], *args):
-        self._keywords = keywords
+        self._keywords = frozenset(keywords)
         super().__init__(*args)
 
     @property
-    def keywords(self):
+    def keywords(self) -> frozenset[str]:
+        """tells what keywords were bad"""
         return self._keywords
 
     @keywords.setter
     def keywords(self, kw):
+        """Throws ValueError because keywords is an
+        immutable property that shouldn't be edited."""
         raise ValueError("keywords property is immutable")
 
 
