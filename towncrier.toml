@@ -3,10 +3,8 @@
 # I Copied this as a template from multidict to help me,
 # because I shouldn't be re-inventing the wheel. 
 # therefore, I have nothing to hide - Vizonex
-
-package = "deprecated-params"
-filename = "CHANGES.rst"
-directory = "CHANGES/"
+name = "deprecated-params"
+directory = "CHANGES"
 title_format = "{version}"
 template = "CHANGES/.TEMPLATE.rst"
 issue_format = "{issue}"
