@@ -2,7 +2,7 @@
 Deprecated Params
 -----------------
 
-A Library dedicated for warning users about deprecated paramter
+A Library dedicated for warning users about deprecated parameter
 names and changes
 """
 
@@ -12,9 +12,18 @@ import inspect
 import sys
 import warnings
 from functools import wraps
-import inspect
 from types import MethodType
-from typing import Callable, Sequence, TypeVar, Mapping, overload, Any
+from typing import (
+    Any,
+    Callable,
+    Iterable,
+    Mapping,
+    Sequence,
+    TypeVar,
+    overload,
+)
+
+# TODO: when 3.9 is no longer supported by CPython, drop this next line
 
 if sys.version_info < (3, 10):
     from typing_extensions import ParamSpec
@@ -23,8 +32,8 @@ else:
 
 
 __version__ = "0.1.5"
-__license__ = "Appache 2.0 / MIT"
-
+__license__ = "Apache 2.0 / MIT"
+__author__ = "Vizonex"
 
 _T = TypeVar("_T", covariant=True)
 _P = ParamSpec("_P")
@@ -37,11 +46,14 @@ __all__ = (
     "MissingKeywordsError",
     "InvalidParametersError",
     "deprecated_params",
+    "__author__",
+    "__license__",
+    "__version__",
 )
 
 
 class _KeywordsBaseException(Exception):
-    def __init__(self, keywords: set[str], *args):
+    def __init__(self, keywords: set[str], *args: Any) -> None:
         self._keywords = frozenset(keywords)
         super().__init__(*args)
 
@@ -51,7 +63,7 @@ class _KeywordsBaseException(Exception):
         return self._keywords
 
     @keywords.setter
-    def keywords(self, kw):
+    def keywords(self, _: frozenset[str]) -> None:
         """Throws ValueError because keywords is an
         immutable property that shouldn't be edited."""
         raise ValueError("keywords property is immutable")
@@ -60,16 +72,18 @@ class _KeywordsBaseException(Exception):
 class MissingKeywordsError(_KeywordsBaseException):
     """Missing keyword for argument"""
 
-    def __init__(self, keywords: set[str], *args):
+    def __init__(self, keywords: set[str], *args: Any) -> None:
         super().__init__(
-            keywords, f"Missing Keyword arguments for: {list(keywords)!r}", *args
+            keywords,
+            f"Missing Keyword arguments for: {list(keywords)!r}",
+            *args,
         )
 
 
 class InvalidParametersError(_KeywordsBaseException):
-    """Parameters were positonal arguments without defaults or keyword arguments"""
+    """Parameters were positional arguments without defaults or keyword arguments"""
 
-    def __init__(self, keywords: set[str], *args):
+    def __init__(self, keywords: set[str], *args: Any) -> None:
         super().__init__(
             keywords,
             f"Arguments :{list(keywords)!r} should not be positional",
@@ -85,7 +99,7 @@ class deprecated_params:
 
     def __init__(
         self,
-        params: Sequence[str],
+        params: Sequence[str] | Iterable[str],
         message: str | Mapping[str, str] = "is deprecated",
         /,
         *,
@@ -95,7 +109,7 @@ class deprecated_params:
         category: type[Warning] | None = DeprecationWarning,
         stacklevel: int = 3,
         display_kw: bool = True,
-    ):
+    ) -> None:
         if not isinstance(message, (str, dict, Mapping)):
             raise TypeError(
                 f"Expected an object of type str or dict or Mappable type for 'message', not {type(message).__name__!r}"
@@ -111,12 +125,12 @@ class deprecated_params:
 
     def __check_with_missing(
         self,
-        fn,
+        fn: Callable[..., Any],
         missing: set[str] | None = None,
         invalid_params: set[str] | None = None,
         skip_missing: bool | None = None,
         allow_miss: bool = False,
-    ):
+    ) -> tuple[set[str], set[str], bool]:
         sig = inspect.signature(fn)
 
         missing = missing if missing is not None else set(self.params)
@@ -149,12 +163,12 @@ class deprecated_params:
 
     def __check_for_missing_kwds(
         self,
-        fn,
+        fn: Callable[..., Any],
         missing: set[str] | None = None,
         invalid_params: set[str] | None = None,
         skip_missing: bool | None = None,
         allow_miss: bool = False,
-    ):
+    ) -> None:
         # copy sequence to check for missing parameter names
         missing, invalid_params, skip_missing = self.__check_with_missing(
             fn, missing, invalid_params, skip_missing, allow_miss
@@ -166,7 +180,7 @@ class deprecated_params:
         if missing and not skip_missing:
             raise MissingKeywordsError(missing)
 
-    def __warn(self, kw_name: str):
+    def __warn(self, kw_name: str) -> None:
         msg = ""
         if self.display_kw:
             msg += 'Parameter "%s" ' % kw_name
@@ -185,7 +199,9 @@ class deprecated_params:
     def __call__(self, arg: Callable[_P, _T]) -> Callable[_P, _T]: ...
 
     # Mirrors python's deprecated wrapper with a few changes
-    def __call__(self, arg: type[_T] | Callable[_P, _T]) -> type[_T] | Callable[_P, _T]:
+    def __call__(
+        self, arg: type[_T] | Callable[_P, _T]
+    ) -> type[_T] | Callable[_P, _T]:
         not_dispatched = self.params.copy()
 
         def check_kw_arguments(kw: dict[str, Any]) -> None:
@@ -206,13 +222,19 @@ class deprecated_params:
                 arg, allow_miss=True
             )
 
-            original_new = arg.__new__
+            original_new: Callable[..., type[_T]] = arg.__new__
             self.__check_for_missing_kwds(
-                original_new, missing, invalid_params, skip_missing, allow_miss=True
+                original_new,
+                missing,
+                invalid_params,
+                skip_missing,
+                allow_miss=True,
             )
 
             @wraps(original_new)
-            def __new__(cls, /, *args, **kwargs):
+            def __new__(
+                cls: type[_T], *args: _P.args, **kwargs: _P.kwargs
+            ) -> type[_T]:
                 check_kw_arguments(kwargs)
                 if original_new is not object.__new__:
                     return original_new(cls, *args, **kwargs)
@@ -238,7 +260,9 @@ class deprecated_params:
                 original_init_subclass = original_init_subclass.__func__
 
                 @wraps(original_init_subclass)
-                def __init_subclass__(*args, **kwargs):
+                def __init_subclass__(
+                    *args: _P.args, **kwargs: _P.kwargs
+                ) -> Any:
                     check_kw_arguments(kwargs)
                     return original_init_subclass(*args, **kwargs)
 
@@ -248,7 +272,9 @@ class deprecated_params:
             else:
 
                 @wraps(original_init_subclass)
-                def __init_subclass__(*args, **kwargs):
+                def __init_subclass__(
+                    *args: _P.args, **kwargs: _P.kwargs
+                ) -> None:
                     check_kw_arguments(kwargs)
                     return original_init_subclass(*args, **kwargs)
 
@@ -257,11 +283,11 @@ class deprecated_params:
             return arg
 
         elif callable(arg):
-            # Check for missing functon arguments
+            # Check for missing function arguments
             self.__check_for_missing_kwds(arg)
 
             @wraps(arg)
-            def wrapper(*args, **kwargs):
+            def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _T:
                 check_kw_arguments(kwargs)
                 return arg(*args, **kwargs)
 
