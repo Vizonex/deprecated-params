@@ -1,1 +1,0 @@
-Added towncrier as a new security check -- by :user:`Vizonex`

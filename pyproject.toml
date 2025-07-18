@@ -20,3 +20,8 @@ dependencies = [
     homepage = "https://github.com/Vizonex/deprecated-params"
     repository = "https://github.com/Vizonex/deprecated-params.git"
 
+[tool.ruff]
+line-length = 79
+indent-width = 4
+target-version = "py39"
+fix = true

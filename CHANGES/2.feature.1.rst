@@ -1,1 +1,0 @@
-Moved deprecated-params to a src directory so that setuptools plays nice with towncrier -- by :user:`Vizonex`
