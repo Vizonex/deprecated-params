@@ -58,5 +58,5 @@ Deprecated-params is now used with two of my own libraries by default.
   - Currently I removed deprecated-params from aiocallback since it wasn't needed anymore but this is what deprecated-param's purpose 
     was for, being there only when its need. I desired nothing more or less.
 
-me to experiemnt with this library to ensure that it was working correctly.
+If you would like to add examples of your own libraries that have used this library feel free to throw me an issue or send me a pull request.
 
