@@ -39,9 +39,9 @@ mc = MyClass("spam", foo="X")
 ## Why I wrote Deprecated Params
 I got tired of throwing random warnings in my code and wanted something cleaner that didn't 
 interfere with a function's actual code and didn't blind anybody trying to go through it. 
-Contributors and Reviewers should be able to utilize a library that saves them from this problems.
+Contributors and Reviewers should be able to utilize a library that saves them from these problems.
 After figuring out that the functionality I was looking for didn't exist I took the opportunity 
-to do so.
+to implement it.
 
 ## Deprecated Params used in real-world Examples 
 Deprecated-params is now used with two of my own libraries by default. 
