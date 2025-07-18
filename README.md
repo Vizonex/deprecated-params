@@ -53,7 +53,10 @@ Deprecated-params is now used with two of my own libraries by default.
   - Lots of interior changes were made and with many arguments being suddenly dropped to increase the performance, the best solution was to warn
     developers to stop using certain parameters as they will be deleted in the future.
 
-- [aiocallback](https://github.com/Vizonex/aiocallback)
+- [aiocallback (mainly used in version 1.6)](https://github.com/Vizonex/aiocallback)
   - Same situation as aiothreading but I decided to buy users more time due to how fast some releases were going and it also allowed
+  - Currently I removed deprecated-params from aiocallback since it wasn't needed anymore but this is what deprecated-param's purpose 
+    was for, being there only when its need. I desired nothing more or less.
+
 me to experiemnt with this library to ensure that it was working correctly.
 
