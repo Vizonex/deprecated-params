@@ -14,6 +14,18 @@ def test_deprecated_param() -> None:
         my_func(0, x=0)
 
 
+def test_deprecated_param_removed_in() -> None:
+    @deprecated_params(["x"], "is deprecated", removed_in={"x": (0, 1, 5)})
+    def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
+        pass
+
+    with pytest.warns(
+        DeprecationWarning,
+        match=r"Parameter \"x\" is deprecated \[Removed In\: 0.1.5\]",
+    ):
+        my_func(0, x=0)
+
+
 def test_class_wrapper_and_kw_display_disabled() -> None:
     @deprecated_params(["foo"], "foo is deprecated", display_kw=False)
     class MyClass:
@@ -33,7 +45,7 @@ class TornadoWarning(DeprecationWarning):
     pass
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="kw_only not on 3.9")  # type: ignore[misc]
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="kw_only not on 3.9")
 def test_dataclasses_with_wrapper_message_dicts_custom_warning() -> None:
     from dataclasses import dataclass, field
 
