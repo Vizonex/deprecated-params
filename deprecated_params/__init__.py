@@ -51,6 +51,12 @@ __all__ = (
     "__version__",
 )
 
+# Word of Warning:
+# All functions marked with underscores should be treated as do not use
+# directly. If you want these parts of code, they are under an MIT License and you
+# are allowed to copy and paste them freely as long as it's not apart of python's
+# warnings.deprecated function which then you will need to license under an APACHE 2.0
+
 
 class _KeywordsBaseException(Exception):
     def __init__(self, keywords: set[str], *args: Any) -> None:
@@ -91,6 +97,16 @@ class InvalidParametersError(_KeywordsBaseException):
         )
 
 
+def join_version_if_sequence(ver: str | Sequence[int]) -> str:
+    return ".".join(map(str, ver)) if not isinstance(ver, str) else ver
+
+
+def convert_removed_in_sequences(
+    removed_in: Mapping[str, str | Sequence[int]],
+) -> dict[str, str]:
+    return {k: join_version_if_sequence(v) for k, v in removed_in.items()}
+
+
 class deprecated_params:
     """
     A Wrapper inspired by python's wrapper deprecated from 3.13
@@ -109,7 +125,54 @@ class deprecated_params:
         category: type[Warning] | None = DeprecationWarning,
         stacklevel: int = 3,
         display_kw: bool = True,
+        # removed_in is inspired by the deprecation library
+        removed_in: str
+        | Sequence[int]
+        | Mapping[str, str | Sequence[int]]
+        | None = None,
     ) -> None:
+        """
+
+        :param params: A Sequence of keyword parameters to deprecate and warn the removal of.
+        :param message: A single message for to assign to each parameter to be deprecated otherwise
+            you can deprecate multiple under different reasons::
+
+                @deprecated_params(
+                    ['mispel', 'x'],
+                    message={
+                        'mispel': 'mispel was deprecated due to misspelling the word',
+                        'x':'you get the idea...'
+                    }
+                )
+                def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
+
+        :param category: Used to warrant a custom warning category if required or needed to specify what
+            Deprecation warning should appear.
+        :param default_message: When a parameter doesn't have a warning message try using this message instead
+        :param display_kw: Displays which parameter is deprecated in the warning message under `Parameter "%s" ...`
+            followed by the rest of the message
+        :param removed_in: Displays which version of your library's program will remove this keyword parameter in::
+
+                @deprecated_params(
+                    ['mispel', 'x'],
+                    removed_in={
+                        'mispel':'0.1.4',
+                        'x':(0, 1, 3)
+                    } # sequences of numbers are also allowed if preferred.
+                )
+
+                def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
+
+            you can also say that all parameters will be removed in one version::
+
+                @deprecated_params(
+                    ['mispel', 'x'],
+                    removed_in='0.1.5' # or (0, 1, 5)
+                )
+                def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
+
+
+        """
         if not isinstance(message, (str, dict, Mapping)):
             raise TypeError(
                 f"Expected an object of type str or dict or Mappable type for 'message', not {type(message).__name__!r}"
@@ -122,6 +185,17 @@ class deprecated_params:
         self.category = category
         self.stacklevel = stacklevel
         self.default_message = default_message or "do not use"
+
+        if removed_in:
+            if isinstance(removed_in, (dict, Mapping)):
+                # Some people might be more comfortable giving versions in tuples or lists.
+                self.removed_in = convert_removed_in_sequences(removed_in)
+            else:
+                # single removed version meaning that all parameters will be removed in this version
+                ver = join_version_if_sequence(removed_in)
+                self.removed_in = {k: ver for k in params}
+        else:
+            self.removed_in = {}
 
     def __check_with_missing(
         self,
@@ -189,6 +263,12 @@ class deprecated_params:
             msg += self.message.get(kw_name, self.default_message)  # type: ignore
         else:
             msg += self.message  # type: ignore
+
+        if self.removed_in:
+            if kw_removed_in := self.removed_in.get(kw_name):
+                msg += " [Removed In: "
+                msg += kw_removed_in
+                msg += "]"
 
         warnings.warn(msg, self.category, stacklevel=self.stacklevel + 1)
 
