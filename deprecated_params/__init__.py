@@ -76,7 +76,7 @@ class _KeywordsBaseException(Exception):
 
 
 class MissingKeywordsError(_KeywordsBaseException):
-    """Missing keyword for argument"""
+    """Raised when Missing a keyword for an argument"""
 
     def __init__(self, keywords: set[str], *args: Any) -> None:
         super().__init__(
@@ -87,7 +87,7 @@ class MissingKeywordsError(_KeywordsBaseException):
 
 
 class InvalidParametersError(_KeywordsBaseException):
-    """Parameters were positional arguments without defaults or keyword arguments"""
+    """Raised when Parameters were positional arguments without defaults or keyword arguments"""
 
     def __init__(self, keywords: set[str], *args: Any) -> None:
         super().__init__(
@@ -113,9 +113,23 @@ class deprecated_params:
     and is used to deprecate parameters
     """
 
+    # __slots__ was an optimizations since subclassing deprecated_params should really be discouraged
+    # if this is not your case scenario and you must subclass this object throw me an issue.
+
+    __slots__ = (
+        "params",
+        "message",
+        "message_is_dict",
+        "display_kw",
+        "category",
+        "stacklevel",
+        "default_message",
+        "removed_in",
+    )
+
     def __init__(
         self,
-        params: Sequence[str] | Iterable[str],
+        params: Sequence[str] | Iterable[str] | str,
         message: str | Mapping[str, str] = "is deprecated",
         /,
         *,
@@ -132,8 +146,7 @@ class deprecated_params:
         | None = None,
     ) -> None:
         """
-
-        :param params: A Sequence of keyword parameters to deprecate and warn the removal of.
+        :param params: A Sequence of keyword parameters of single keyword parameter to deprecate and warn the removal of.
         :param message: A single message for to assign to each parameter to be deprecated otherwise
             you can deprecate multiple under different reasons::
 
@@ -148,6 +161,7 @@ class deprecated_params:
 
         :param category: Used to warrant a custom warning category if required or needed to specify what
             Deprecation warning should appear.
+        :param stacklevel: What level should this wanring appear at? Default: 3
         :param default_message: When a parameter doesn't have a warning message try using this message instead
         :param display_kw: Displays which parameter is deprecated in the warning message under `Parameter "%s" ...`
             followed by the rest of the message
@@ -178,7 +192,9 @@ class deprecated_params:
                 f"Expected an object of type str or dict or Mappable type for 'message', not {type(message).__name__!r}"
             )
 
-        self.params = set(params)
+        self.params = (
+            set(params) if not isinstance(params, str) else set([params])
+        )
         self.message = message or "is deprecated"
         self.message_is_dict = isinstance(message, (Mapping, dict))
         self.display_kw = display_kw
@@ -270,7 +286,7 @@ class deprecated_params:
                 msg += kw_removed_in
                 msg += "]"
 
-        warnings.warn(msg, self.category, stacklevel=self.stacklevel + 1)
+        warnings.warn(msg, self.category, stacklevel=self.stacklevel)
 
     @overload
     def __call__(self, arg: type[_T]) -> type[_T]: ...
@@ -288,7 +304,6 @@ class deprecated_params:
             nonlocal not_dispatched
             if not_dispatched:
                 for k in kw.keys():
-                    print(k, not_dispatched)
                     if k in not_dispatched:
                         self.__warn(k)
                         # remove after so we don't repeat
