@@ -6,12 +6,15 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import deprecated_params
+try:
+    from deprecated_params import __version__
+except ModuleNotFoundError:
+    __version__ = "0.1.7"
 
 project = "deprecated-params"
 copyright = "2025, Vizonex"
 author = "Vizonex"
-release = deprecated_params.__version__
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
