@@ -10,7 +10,7 @@ Based off python's `warnings.deprecated(...)` wrapper `PEP 702 <https://peps.pyt
 
 **deprecated-params** was made for solving the problems of warning users that certain parameters will
 not be used anymore and that better ones exist. **deprecated-params** was made with the intent of being.
-Tiny, easy to use & disposable later from any python library. Although libraries that may be simillar to this 
+Tiny, easy to use & disposable later from any python library. Although libraries that may be similar to this 
 one do exist it was my goal to give a simplsitic name for install with a simplsitic interface. 
 3 of my own libraries either have already used it and been removed after deprecation or currently have it inplace.
 **deprecated-params** should retain typehinting at all-times and should be able to retain type typehints of 

@@ -124,7 +124,7 @@ class deprecated_params:
         "category",
         "stacklevel",
         "default_message",
-        "removed_in"
+        "removed_in",
     )
 
     def __init__(
@@ -192,7 +192,9 @@ class deprecated_params:
                 f"Expected an object of type str or dict or Mappable type for 'message', not {type(message).__name__!r}"
             )
 
-        self.params = set(params) if not isinstance(params, str) else set([params])
+        self.params = (
+            set(params) if not isinstance(params, str) else set([params])
+        )
         self.message = message or "is deprecated"
         self.message_is_dict = isinstance(message, (Mapping, dict))
         self.display_kw = display_kw

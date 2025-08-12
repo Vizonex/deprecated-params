@@ -8,9 +8,9 @@
 
 import deprecated_params
 
-project = 'deprecated-params'
-copyright = '2025, Vizonex'
-author = 'Vizonex'
+project = "deprecated-params"
+copyright = "2025, Vizonex"
+author = "Vizonex"
 release = deprecated_params.__version__
 
 # -- General configuration ---------------------------------------------------
@@ -31,7 +31,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'aiohttp_theme'
+html_theme = "aiohttp_theme"
 
 
 html_theme_options = {
@@ -44,6 +44,4 @@ html_theme_options = {
     "github_banner": True,
 }
 
-intersphinx_mapping = {
-    "python": ("http://docs.python.org/3", None)
-}
+intersphinx_mapping = {"python": ("http://docs.python.org/3", None)}

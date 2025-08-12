@@ -14,6 +14,7 @@ def test_deprecated_param() -> None:
     with pytest.warns(DeprecationWarning, match='Parameter "x" is deprecated'):
         my_func(0, x=0)
 
+
 def test_single_deprecated_param() -> None:
     @deprecated_params("x", "is deprecated")
     def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
@@ -22,11 +23,12 @@ def test_single_deprecated_param() -> None:
     with pytest.warns(DeprecationWarning, match='Parameter "x" is deprecated'):
         my_func(0, x=0)
 
+
 def test_no_warn_if_deprecated_parameter_not_passed() -> None:
     @deprecated_params("x", "is deprecated")
     def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
         pass
-    
+
     # Do not raise or print a warning when X is not passed...
     with warnings.catch_warnings():
         warnings.simplefilter("error")
@@ -58,6 +60,7 @@ def test_class_wrapper_and_kw_display_disabled() -> None:
 
     with pytest.warns(DeprecationWarning, match="foo is deprecated"):
         MyClass("spam", foo="foo")
+
 
 def test_class_wrapper_and_kw_display_disabled_one_param() -> None:
     @deprecated_params("foo", "foo is deprecated", display_kw=False)
