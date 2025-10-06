@@ -9,14 +9,30 @@ deprecated-params documentation
 Based off python's `warnings.deprecated(...)` wrapper `PEP 702 <https://peps.python.org/pep-0702/>`_
 
 **deprecated-params** was made for solving the problems of warning users that certain parameters will
-not be used anymore and that better ones exist. **deprecated-params** was made with the intent of being.
-Tiny, easy to use & disposable later from any python library. Although libraries that may be similar to this 
-one do exist it was my goal to give a simplsitic name for install with a simplsitic interface. 
-3 of my own libraries either have already used it and been removed after deprecation or currently have it inplace.
-**deprecated-params** should retain typehinting at all-times and should be able to retain type typehints of 
-anything you can wrap to a function under the sun including 
-functions like ``__init__``, ``__init_subclass__`` & ``__new__`` all of which will retain Parameter data with ides 
-such as **Visual-Studio-Code**, **PyCharm** and many more.
+not be used anymore and that better ones exist. **deprecated-params** was made with the intent of being,
+tiny, easy to use & disposable later from any python library. Although libraries that may be similar to this 
+one that do exist it was my goal to give a simplsitic name for install with a simplsitic interface and fast performance. 
+many of my own libraries that are maintained by me either have already used it and been removed 
+after deprecation or currently have it inplace. **deprecated-params** should retain typehinting at all-times and 
+should be able to retain typehints of anything you can wrap to a function under the sun including 
+functions like ``__init__``, ``__init_subclass__`` & ``__new__`` all of which will retain Parameter data 
+with ides & code editors such as **Visual-Studio-Code** with the pyright extension, **PyCharm** and many more.
+
+Examples of libraries that currently used or dropped deprecated-params:
+
+- `cyares <https://github.com/Vizonex/cyares>`_ DNS Resolver replacement for pycares without resorting to weird cleanups 
+    and has aggressive systems inplace to prevent unwanted or new vulnerabilities. It includes trio and asyncio wrappers as well as an experimental 
+    aiohttp extension that is injectable.
+
+- `aiothreading <https://github.com/Vizonex/aiothreading>`_ The Heart where deprecated-params originated off of. It is currently still in use.
+
+- `aiocallback <https://github.com/Vizonex/aiocallback>`_ Another project that sparked deprecated-params's seperation from aiothreading. It was dropped
+    a while ago when certain arguments were no longer in use...
+
+
+Addintionaly for a little bit of additional speed it can be compiled in Cython simillar to how `yarl <https://yarl.aio-libs.org/en/latest/>`_
+and `propcache <https://propcache.aio-libs.org/en/latest/>`_ both work, one of them I've contributed my work to (propcache).
+
 
 
 Installation

@@ -4,10 +4,25 @@ from deprecated_params import deprecated_params
 import sys
 import warnings
 
+@pytest.fixture(
+    params=(
+        True,
+        False
+    ),
+    ids=["c", "py"]
+)
+def deprecated_params_type(request:pytest.FixtureRequest):
+    if request.param:
+        from deprecated_params._helpers_c import deprecated_params
+        return deprecated_params
+    else:
+        from deprecated_params._helpers_py import deprecated_params
+        return deprecated_params
+
 
 # should carry w x y
-def test_deprecated_param() -> None:
-    @deprecated_params(["x"], "is deprecated")
+def test_deprecated_param(deprecated_params_type: type[deprecated_params]) -> None:
+    @deprecated_params_type(["x"], "is deprecated")
     def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
         pass
 
@@ -15,8 +30,8 @@ def test_deprecated_param() -> None:
         my_func(0, x=0)
 
 
-def test_single_deprecated_param() -> None:
-    @deprecated_params("x", "is deprecated")
+def test_single_deprecated_param(deprecated_params_type: type[deprecated_params])  -> None:
+    @deprecated_params_type("x", "is deprecated")
     def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
         pass
 
@@ -24,8 +39,8 @@ def test_single_deprecated_param() -> None:
         my_func(0, x=0)
 
 
-def test_no_warn_if_deprecated_parameter_not_passed() -> None:
-    @deprecated_params("x", "is deprecated")
+def test_no_warn_if_deprecated_parameter_not_passed(deprecated_params_type: type[deprecated_params]) -> None:
+    @deprecated_params_type("x", "is deprecated")
     def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
         pass
 
@@ -35,8 +50,8 @@ def test_no_warn_if_deprecated_parameter_not_passed() -> None:
         my_func(1, y=0)
 
 
-def test_deprecated_param_removed_in() -> None:
-    @deprecated_params(["x"], "is deprecated", removed_in={"x": (0, 1, 5)})
+def test_deprecated_param_removed_in(deprecated_params_type: type[deprecated_params]) -> None:
+    @deprecated_params_type(["x"], "is deprecated", removed_in={"x": (0, 1, 5)})
     def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
         pass
 
@@ -47,8 +62,8 @@ def test_deprecated_param_removed_in() -> None:
         my_func(0, x=0)
 
 
-def test_class_wrapper_and_kw_display_disabled() -> None:
-    @deprecated_params(["foo"], "foo is deprecated", display_kw=False)
+def test_class_wrapper_and_kw_display_disabled(deprecated_params_type: type[deprecated_params]) -> None:
+    @deprecated_params_type(["foo"], "foo is deprecated", display_kw=False)
     class MyClass:
         def __init__(self, spam: str, *, foo: Optional[str] = None):
             self.spam = spam
@@ -62,8 +77,8 @@ def test_class_wrapper_and_kw_display_disabled() -> None:
         MyClass("spam", foo="foo")
 
 
-def test_class_wrapper_and_kw_display_disabled_one_param() -> None:
-    @deprecated_params("foo", "foo is deprecated", display_kw=False)
+def test_class_wrapper_and_kw_display_disabled_one_param(deprecated_params_type: type[deprecated_params]) -> None:
+    @deprecated_params_type("foo", "foo is deprecated", display_kw=False)
     class MyClass:
         def __init__(self, spam: str, *, foo: Optional[str] = None):
             self.spam = spam
@@ -83,10 +98,10 @@ class TornadoWarning(DeprecationWarning):
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="kw_only not on 3.9")
-def test_dataclasses_with_wrapper_message_dicts_custom_warning() -> None:
+def test_dataclasses_with_wrapper_message_dicts_custom_warning(deprecated_params_type: deprecated_params) -> None:
     from dataclasses import dataclass, field
 
-    @deprecated_params(
+    @deprecated_params_type(
         ["foo", "spam"],
         {"foo": "got foo", "spam": "got spam"},
         display_kw=False,
