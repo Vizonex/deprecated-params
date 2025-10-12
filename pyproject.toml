@@ -1,9 +1,10 @@
 [build-system]
-requires = ["setuptools"]
-
+requires = [
+    "setuptools >= 47"
+]
 [project]
 name = "deprecated-params"
-version = "0.1.7"
+version = "0.1.8"
 description = "A Wrapper for functions, class objects and methods for deprecating keyword parameters"
 readme = "README.md"
 authors = [

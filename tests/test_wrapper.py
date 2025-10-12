@@ -47,6 +47,33 @@ def test_deprecated_param_removed_in() -> None:
         my_func(0, x=0)
 
 
+def test_deprecated_params_dunder_attribute() -> None:
+    @deprecated_params(["x"], "is deprecated", removed_in={"x": (0, 1, 5)})
+    def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
+        pass
+
+    assert getattr(my_func, "__deprecated_params__") == {
+        "x": 'Parameter "x" is deprecated [Removed In: 0.1.5]'
+    }
+
+
+def test_deprecated_param_no_raise_on_second_instance() -> None:
+    @deprecated_params(["x"], "is deprecated", removed_in={"x": (0, 1, 5)})
+    def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
+        pass
+
+    with pytest.warns(
+        DeprecationWarning,
+        match=r"Parameter \"x\" is deprecated \[Removed In\: 0.1.5\]",
+    ):
+        my_func(0, x=0)
+
+    with warnings.catch_warnings():
+        # disallow warning a second time...
+        my_func(1, x=0)
+        warnings.simplefilter("error")
+
+
 def test_class_wrapper_and_kw_display_disabled() -> None:
     @deprecated_params(["foo"], "foo is deprecated", display_kw=False)
     class MyClass:
