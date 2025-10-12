@@ -22,7 +22,6 @@ from typing import (
     TypeVar,
     overload,
 )
-
 # TODO: when 3.9 is no longer supported by CPython, drop this next line
 
 if sys.version_info < (3, 10):
@@ -31,7 +30,7 @@ else:
     from typing import ParamSpec
 
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -79,6 +78,7 @@ class MissingKeywordsError(_KeywordsBaseException):
     """Raised when Missing a keyword for an argument"""
 
     def __init__(self, keywords: set[str], *args: Any) -> None:
+        """Initializes missing keywords"""
         super().__init__(
             keywords,
             f"Missing Keyword arguments for: {list(keywords)!r}",
@@ -90,6 +90,8 @@ class InvalidParametersError(_KeywordsBaseException):
     """Raised when Parameters were positional arguments without defaults or keyword arguments"""
 
     def __init__(self, keywords: set[str], *args: Any) -> None:
+        """initializes invalid keywords, deprecated parameters should not be positional arguments
+        as that would defeat the purpose of deprecating a function's parameters."""
         super().__init__(
             keywords,
             f"Arguments :{list(keywords)!r} should not be positional",
@@ -110,7 +112,14 @@ def convert_removed_in_sequences(
 class deprecated_params:
     """
     A Wrapper inspired by python's wrapper deprecated from 3.13
-    and is used to deprecate parameters
+    and is used to deprecate parameters.
+
+    Since version 0.1.8 this wrapper also passes along an attribute
+    called `__deprecated_params__` with a dictionary of all the
+    preloaded deprecation warnings to each given parameter. Ides
+    such as VSCode, Pycharm and more could theoretically utilize
+    `__deprecated_params__` elsewhere help to assist users and developers
+    while writing and editing code.
     """
 
     # __slots__ was an optimizations since subclassing deprecated_params should really be discouraged
@@ -125,6 +134,7 @@ class deprecated_params:
         "stacklevel",
         "default_message",
         "removed_in",
+        "_warning_messages",
     )
 
     def __init__(
@@ -146,6 +156,8 @@ class deprecated_params:
         | None = None,
     ) -> None:
         """
+        Initializes deprecated parameters to pass along to different functions
+
         :param params: A Sequence of keyword parameters of single keyword parameter to deprecate and warn the removal of.
         :param message: A single message for to assign to each parameter to be deprecated otherwise
             you can deprecate multiple under different reasons::
@@ -187,6 +199,8 @@ class deprecated_params:
 
 
         """
+        if not params:
+            raise ValueError(f"params should not be empty got {params!r}")
         if not isinstance(message, (str, dict, Mapping)):
             raise TypeError(
                 f"Expected an object of type str or dict or Mappable type for 'message', not {type(message).__name__!r}"
@@ -195,6 +209,7 @@ class deprecated_params:
         self.params = (
             set(params) if not isinstance(params, str) else set([params])
         )
+
         self.message = message or "is deprecated"
         self.message_is_dict = isinstance(message, (Mapping, dict))
         self.display_kw = display_kw
@@ -212,6 +227,12 @@ class deprecated_params:
                 self.removed_in = {k: ver for k in params}
         else:
             self.removed_in = {}
+
+        # Preloaded previews of all warning messages new in deprecated-params 0.1.8 for extra speed
+        # upon loading the message
+        self._warning_messages: dict[str, str] = {
+            p: self.__write_warning(p) for p in self.params
+        }
 
     def __check_with_missing(
         self,
@@ -270,7 +291,7 @@ class deprecated_params:
         if missing and not skip_missing:
             raise MissingKeywordsError(missing)
 
-    def __warn(self, kw_name: str) -> None:
+    def __write_warning(self, kw_name: str) -> str:
         msg = ""
         if self.display_kw:
             msg += 'Parameter "%s" ' % kw_name
@@ -286,7 +307,15 @@ class deprecated_params:
                 msg += kw_removed_in
                 msg += "]"
 
-        warnings.warn(msg, self.category, stacklevel=self.stacklevel)
+        return msg
+
+    def __warn(self, kw_name: str, source: Any) -> None:
+        warnings.warn(
+            self._warning_messages[kw_name],
+            self.category,
+            stacklevel=self.stacklevel,
+            source=source,
+        )
 
     @overload
     def __call__(self, arg: type[_T]) -> type[_T]: ...
@@ -295,19 +324,19 @@ class deprecated_params:
     def __call__(self, arg: Callable[_P, _T]) -> Callable[_P, _T]: ...
 
     # Mirrors python's deprecated wrapper with a few changes
+    # Since 0.1.8 a new attribute is added called __deprecated_params__
+    # based off and inspired by python's __deprecated__ dunder value.
+
     def __call__(
         self, arg: type[_T] | Callable[_P, _T]
     ) -> type[_T] | Callable[_P, _T]:
-        not_dispatched = self.params.copy()
+        shadow_copy = self.params.copy()
 
         def check_kw_arguments(kw: dict[str, Any]) -> None:
-            nonlocal not_dispatched
-            if not_dispatched:
-                for k in kw.keys():
-                    if k in not_dispatched:
-                        self.__warn(k)
-                        # remove after so we don't repeat
-                        not_dispatched.remove(k)
+            captured = shadow_copy.intersection(kw.keys())
+            for k in captured:
+                self.__warn(k, arg)
+                shadow_copy.remove(k)
 
         if isinstance(arg, type):
             # NOTE: Combining init and new together is done to
@@ -340,6 +369,7 @@ class deprecated_params:
                     return original_new(cls)
 
             arg.__new__ = staticmethod(__new__)  # type: ignore
+            arg.__new__.__deprecated_params__ = self._warning_messages.copy()  # type: ignore
 
             original_init_subclass = arg.__init_subclass__
             # Python Comment: We need slightly different behavior if __init_subclass__
@@ -362,6 +392,10 @@ class deprecated_params:
                     return original_init_subclass(*args, **kwargs)
 
                 arg.__init_subclass__ = classmethod(__init_subclass__)  # type: ignore
+                arg.__init_subclass__.__deprecated_params__ = (  # type: ignore[attr-defined]
+                    self._warning_messages.copy()
+                )
+
             # Python Comment: Or otherwise, which likely means it's a builtin such as
             # object's implementation of __init_subclass__.
             else:
@@ -374,7 +408,9 @@ class deprecated_params:
                     return original_init_subclass(*args, **kwargs)
 
                 arg.__init_subclass__ = __init_subclass__  # type: ignore
-
+                arg.__init_subclass__.__deprecated_params__ = (  # type: ignore[attr-defined]
+                    self._warning_messages.copy()
+                )
             return arg
 
         elif callable(arg):
@@ -390,6 +426,8 @@ class deprecated_params:
                 if inspect.iscoroutinefunction(arg):
                     wrapper = inspect.markcoroutinefunction(wrapper)
 
+            # Wrapper now contains a shadow copy of deprecated parameters
+            wrapper.__deprecated_params__ = self._warning_messages.copy()  # type: ignore
             return wrapper
 
         else:

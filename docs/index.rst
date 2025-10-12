@@ -31,56 +31,9 @@ The library requires Python 3.9 or newer.
 API
 ---
 
-.. class::MissingKeywordsError()
-      Raised when Missing a keyword for an argument
-
-.. class::InvalidParametersError()
-      Raised when Parameters were positional arguments without defaults or keyword arguments
-
-
-.. class:: deprecated_params(params: Sequence[str] | Iterable[str] | str, message: str | Mapping[str, str] = "is deprecated", /, *, default_message: str | None = None, category: type[Warning] | None = DeprecationWarning, stacklevel: int = 3, display_kw: bool = True, removed_in: str | Sequence[int] | Mapping[str, str | Sequence[int]] | None = None)
-         A Wrapper inspired by python's wrapper deprecated from 3.13 and is used to deprecate parameters that are transformed into keyword arguments
-         
-         :param params: A Sequence of keyword parameters of single keyword parameter to deprecate and warn the removal of.
-         :param message: A single message for to assign to each parameter to be deprecated otherwise
-            you can deprecate multiple under different reasons::
-
-                @deprecated_params(
-                    ['mispel', 'x'],
-                    message={
-                        'mispel': 'mispel was deprecated due to misspelling the word',
-                        'x':'you get the idea...'
-                    }
-                )
-                def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
-
-         :param category:     Used to warrant a custom warning category if required or needed to specify what
-               Deprecation warning should appear.
-         :param stacklevel:   What level should this wanring appear at? Default: 3
-         :param default_message:    When a parameter doesn't have a warning message try using this message instead
-         :param display_kw:   Displays which parameter is deprecated in the warning message under "Parameter "%s" ..."  followed by the rest of the message
-         :param removed_in:   Displays which version of your library's program will remove this keyword parameter 
-            in::
-
-                   @deprecated_params(
-                       ['mispel', 'x'],
-                       removed_in={
-                           'mispel':'0.1.4',
-                           'x':(0, 1, 3)
-                       } # sequences of numbers are also allowed if preferred.
-                   )
-
-                   def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
-
-            you can also say that all parameters will be removed in one version::
-
-                   @deprecated_params(
-                       ['mispel', 'x'],
-                       removed_in='0.1.5' # or (0, 1, 5)
-                   )
-                   def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
-
-      
+.. automodule:: deprecated_params
+    :members:
+    :special-members: __call__, __init__
 
 
 .. toctree::
