@@ -1,8 +1,6 @@
 # obviously can't have that
 __pycache__
 
-docs/_build/*
-
 # virtual enviornments
 .venv
 .pytest_cache
