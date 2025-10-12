@@ -2,6 +2,8 @@
 requires = [
     "setuptools >= 47"
 ]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "deprecated-params"
 dynamic = ["version"]
