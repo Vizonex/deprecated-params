@@ -30,7 +30,7 @@ else:
     from typing import ParamSpec
 
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
