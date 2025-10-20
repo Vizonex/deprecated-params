@@ -147,7 +147,7 @@ class deprecated_params:
         # given in message if messaged is defined as a dictionary.
         default_message: str | None = None,
         category: type[Warning] | None = DeprecationWarning,
-        stacklevel: int = 3,
+        stacklevel: int = 1,
         display_kw: bool = True,
         # removed_in is inspired by the deprecation library
         removed_in: str
@@ -173,7 +173,7 @@ class deprecated_params:
 
         :param category: Used to warrant a custom warning category if required or needed to specify what
             Deprecation warning should appear.
-        :param stacklevel: What level should this wanring appear at? Default: 3
+        :param stacklevel: What level should this wanring appear at? Default: 1
         :param default_message: When a parameter doesn't have a warning message try using this message instead
         :param display_kw: Displays which parameter is deprecated in the warning message under `Parameter "%s" ...`
             followed by the rest of the message
@@ -313,7 +313,7 @@ class deprecated_params:
         warnings.warn(
             self._warning_messages[kw_name],
             self.category,
-            stacklevel=self.stacklevel,
+            stacklevel=self.stacklevel + 1,
             source=source,
         )
 
