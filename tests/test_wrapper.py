@@ -57,7 +57,9 @@ def test_deprecated_params_dunder_attribute() -> None:
     }
 
 
-def test_deprecated_param_no_raise_on_second_instance() -> None:
+# Since 0.2.0 we no longer repeat warnings once. We do it
+# so that developers are more willing to remove specific keyword parameters
+def test_deprecated_param_repeat_twice() -> None:
     @deprecated_params(["x"], "is deprecated", removed_in={"x": (0, 1, 5)})
     def my_func(w: int, *, x: int = 0, y: int = 0) -> None:
         pass
@@ -68,10 +70,11 @@ def test_deprecated_param_no_raise_on_second_instance() -> None:
     ):
         my_func(0, x=0)
 
-    with warnings.catch_warnings():
-        # disallow warning a second time...
-        my_func(1, x=0)
-        warnings.simplefilter("error")
+    with pytest.warns(
+        DeprecationWarning,
+        match=r"Parameter \"x\" is deprecated \[Removed In\: 0.1.5\]",
+    ):
+        my_func(0, x=0)
 
 
 def test_class_wrapper_and_kw_display_disabled() -> None:
