@@ -22,7 +22,7 @@ from typing import (
     TypeVar,
     overload,
 )
-# TODO: when 3.9 is no longer supported by CPython, drop this next line
+
 
 if sys.version_info < (3, 10):
     from typing_extensions import ParamSpec
@@ -330,13 +330,10 @@ class deprecated_params:
     def __call__(
         self, arg: type[_T] | Callable[_P, _T]
     ) -> type[_T] | Callable[_P, _T]:
-        shadow_copy = self.params.copy()
-
         def check_kw_arguments(kw: dict[str, Any]) -> None:
-            captured = shadow_copy.intersection(kw.keys())
+            captured = self.params.intersection(kw.keys())
             for k in captured:
                 self.__warn(k, arg)
-                shadow_copy.remove(k)
 
         if isinstance(arg, type):
             # NOTE: Combining init and new together is done to
