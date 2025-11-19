@@ -21,16 +21,16 @@ from typing import (
     Sequence,
     TypeVar,
     overload,
+    ParamSpec,
 )
 
-
-if sys.version_info < (3, 10):
-    from typing_extensions import ParamSpec
+if sys.version_info[:2] < (3, 13):
+    from typing_extensions import deprecated
 else:
-    from typing import ParamSpec
+    from warnings import deprecated
 
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -58,6 +58,8 @@ __all__ = (
 
 
 class _KeywordsBaseException(Exception):
+    __slots__ = "_keywords"
+
     def __init__(self, keywords: set[str], *args: Any) -> None:
         self._keywords = frozenset(keywords)
         super().__init__(*args)
@@ -126,16 +128,20 @@ class deprecated_params:
     # if this is not your case scenario and you must subclass this object throw me an issue.
 
     __slots__ = (
-        "params",
-        "message",
-        "message_is_dict",
-        "display_kw",
-        "category",
-        "stacklevel",
-        "default_message",
-        "removed_in",
+        "_params",
+        "_message",
+        "_message_is_dict",
+        "_display_kw",
+        "_category",
+        "_stacklevel",
+        "_default_message",
+        "_removed_in",
         "_warning_messages",
     )
+
+    @deprecated("subclassing will not be allowed in version 0.4.0")
+    def __init_subclass__(cls) -> None:
+        pass
 
     def __init__(
         self,
@@ -206,32 +212,32 @@ class deprecated_params:
                 f"Expected an object of type str or dict or Mappable type for 'message', not {type(message).__name__!r}"
             )
 
-        self.params = (
+        self._params = (
             set(params) if not isinstance(params, str) else set([params])
         )
 
-        self.message = message or "is deprecated"
-        self.message_is_dict = isinstance(message, (Mapping, dict))
-        self.display_kw = display_kw
-        self.category = category
-        self.stacklevel = stacklevel
-        self.default_message = default_message or "do not use"
+        self._message = message or "is deprecated"
+        self._message_is_dict = isinstance(message, (Mapping, dict))
+        self._display_kw = display_kw
+        self._category = category
+        self._stacklevel = stacklevel
+        self._default_message = default_message or "do not use"
 
         if removed_in:
             if isinstance(removed_in, (dict, Mapping)):
                 # Some people might be more comfortable giving versions in tuples or lists.
-                self.removed_in = convert_removed_in_sequences(removed_in)
+                self._removed_in = convert_removed_in_sequences(removed_in)
             else:
                 # single removed version meaning that all parameters will be removed in this version
                 ver = join_version_if_sequence(removed_in)
-                self.removed_in = {k: ver for k in params}
+                self._removed_in = {k: ver for k in params}
         else:
-            self.removed_in = {}
+            self._removed_in = {}
 
         # Preloaded previews of all warning messages new in deprecated-params 0.1.8 for extra speed
         # upon loading the message
         self._warning_messages: dict[str, str] = {
-            p: self.__write_warning(p) for p in self.params
+            p: self.__write_warning(p) for p in self._params
         }
 
     def __check_with_missing(
@@ -244,7 +250,7 @@ class deprecated_params:
     ) -> tuple[set[str], set[str], bool]:
         sig = inspect.signature(fn)
 
-        missing = missing if missing is not None else set(self.params)
+        missing = missing if missing is not None else set(self._params)
         invalid_params = set() if invalid_params is None else invalid_params
 
         skip_missing = (
@@ -253,7 +259,7 @@ class deprecated_params:
             else skip_missing
         )
 
-        for m in self.params:
+        for m in self._params:
             if not allow_miss:
                 p = sig.parameters[m]
             else:
@@ -293,16 +299,16 @@ class deprecated_params:
 
     def __write_warning(self, kw_name: str) -> str:
         msg = ""
-        if self.display_kw:
+        if self._display_kw:
             msg += 'Parameter "%s" ' % kw_name
 
-        if self.message_is_dict:
-            msg += self.message.get(kw_name, self.default_message)  # type: ignore
+        if self._message_is_dict:
+            msg += self._message.get(kw_name, self._default_message)  # type: ignore
         else:
-            msg += self.message  # type: ignore
+            msg += self._message  # type: ignore
 
-        if self.removed_in:
-            if kw_removed_in := self.removed_in.get(kw_name):
+        if self._removed_in:
+            if kw_removed_in := self._removed_in.get(kw_name):
                 msg += " [Removed In: "
                 msg += kw_removed_in
                 msg += "]"
@@ -312,8 +318,8 @@ class deprecated_params:
     def __warn(self, kw_name: str, source: Any) -> None:
         warnings.warn(
             self._warning_messages[kw_name],
-            self.category,
-            stacklevel=self.stacklevel + 1,
+            self._category,
+            stacklevel=self._stacklevel + 1,
             source=source,
         )
 
@@ -331,8 +337,7 @@ class deprecated_params:
         self, arg: type[_T] | Callable[_P, _T]
     ) -> type[_T] | Callable[_P, _T]:
         def check_kw_arguments(kw: dict[str, Any]) -> None:
-            captured = self.params.intersection(kw.keys())
-            for k in captured:
+            for k in self._params.intersection(kw.keys()):
                 self.__warn(k, arg)
 
         if isinstance(arg, type):
