@@ -8,9 +8,9 @@ authors = [
     { name = "Vizonex", email="VizonexBusiness@gmail.com"},
 ]
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-    'typing-extensions; python_version<"3.10"'
+    'typing-extensions; python_version<"3.13"' # warnings.deprecated
 ]
 [tool.setuptools.dynamic]
 version = {attr = "deprecated_params.__version__"}

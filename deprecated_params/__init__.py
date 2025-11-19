@@ -21,13 +21,13 @@ from typing import (
     Sequence,
     TypeVar,
     overload,
+    ParamSpec,
 )
 
-
-if sys.version_info < (3, 10):
-    from typing_extensions import ParamSpec
+if sys.version_info[:2] < (3, 13):
+    from typing_extensions import deprecated
 else:
-    from typing import ParamSpec
+    from warnings import deprecated
 
 
 __version__ = "0.3.0"
@@ -138,6 +138,10 @@ class deprecated_params:
         "_removed_in",
         "_warning_messages",
     )
+
+    @deprecated("subclassing will not be allowed in version 0.4.0")
+    def __init_subclass__(cls) -> None:
+        pass
 
     def __init__(
         self,
