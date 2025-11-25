@@ -139,4 +139,10 @@ def test_dataclasses_with_wrapper_message_dicts_custom_warning() -> None:
         Class()
 
 
-# TODO: Metaclasses...
+def test_deprecated_params_shouldnt_subclass() -> None:
+    with pytest.raises(TypeError):
+        # We want this to Fail on TypeError because
+        # deprecated_params is now wrapped in a Final
+        # metaclass to prevent subclassing...
+        class deprecated_mess(deprecated_params):  # type: ignore[misc]
+            pass

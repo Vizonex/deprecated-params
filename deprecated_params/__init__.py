@@ -22,15 +22,10 @@ from typing import (
     TypeVar,
     overload,
     ParamSpec,
+    final,
 )
 
-if sys.version_info[:2] < (3, 13):
-    from typing_extensions import deprecated
-else:
-    from warnings import deprecated
-
-
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -111,7 +106,31 @@ def convert_removed_in_sequences(
     return {k: join_version_if_sequence(v) for k, v in removed_in.items()}
 
 
-class deprecated_params:
+# https://stackoverflow.com/a/16056691
+# I made a few adjustments...
+
+
+class Final(type):
+    def __new__(
+        cls: type[_T],
+        name: str,
+        bases: tuple[type, ...],
+        classdict: dict[str, Any],
+        /,
+        **kwds: Any,
+    ) -> _T:
+        for b in bases:
+            if isinstance(b, Final):
+                raise TypeError(
+                    "type '{0}' cannot be subclassed further".format(
+                        b.__name__
+                    )
+                )
+        return type.__new__(cls, name, bases, dict(classdict), **kwds)
+
+
+@final
+class deprecated_params(metaclass=Final):
     """
     A Wrapper inspired by python's wrapper deprecated from 3.13
     and is used to deprecate parameters.
@@ -124,8 +143,8 @@ class deprecated_params:
     while writing and editing code.
     """
 
-    # __slots__ was an optimizations since subclassing deprecated_params should really be discouraged
-    # if this is not your case scenario and you must subclass this object throw me an issue.
+    # __slots__ was an optimization since subclassing deprecated_params was disabled
+    # if you want a more simplified version of this class object throw me an issue on github - Vizonex.
 
     __slots__ = (
         "_params",
@@ -138,10 +157,6 @@ class deprecated_params:
         "_removed_in",
         "_warning_messages",
     )
-
-    @deprecated("subclassing will not be allowed in version 0.4.0")
-    def __init_subclass__(cls) -> None:
-        pass
 
     def __init__(
         self,
