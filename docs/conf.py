@@ -9,7 +9,7 @@
 try:
     from deprecated_params import __version__
 except ModuleNotFoundError:
-    __version__ = "0.1.7"
+    __version__ = "0.5.0"
 
 project = "deprecated-params"
 copyright = "2025, Vizonex"
@@ -39,7 +39,8 @@ html_theme = "aiohttp_theme"
 
 html_theme_options = {
     "logo": None,
-    "description": "A Wrapper for functions, class objects and methods for deprecating keyword parameters",
+    "description": "A Wrapper for functions, class objects and methods"
+    " for deprecating keyword parameters",
     "github_user": "Vizonex",
     "github_repo": "deprecated-params",
     "github_button": True,
