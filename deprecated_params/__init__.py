@@ -2,8 +2,14 @@
 Deprecated Params
 -----------------
 
-A Library dedicated for warning users about deprecated parameter
-names and changes
+A Library dedicated to warning users about keyword parameters
+being removed or changed::
+
+    from deprecated_params import deprecated_params
+
+    @deprecated_params(['x'])
+    def func(y, *, x:int = 0):
+        pass
 """
 
 from __future__ import annotations
@@ -11,21 +17,18 @@ from __future__ import annotations
 import inspect
 import sys
 import warnings
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from functools import wraps
 from types import MethodType
 from typing import (
     Any,
-    Callable,
-    Iterable,
-    Mapping,
-    Sequence,
-    TypeVar,
-    overload,
     ParamSpec,
+    TypeVar,
     final,
+    overload,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -47,9 +50,10 @@ __all__ = (
 
 # Word of Warning:
 # All functions marked with underscores should be treated as do not use
-# directly. If you want these parts of code, they are under an MIT License and you
-# are allowed to copy and paste them freely as long as it's not apart of python's
-# warnings.deprecated function which then you will need to license under an APACHE 2.0
+# directly. If you want these parts of code, they are under an MIT License and
+# you are allowed to copy and paste them freely as long as it's not apart of
+# python's warnings.deprecated function which then you will need to license
+# under an APACHE 2.0
 
 
 class _KeywordsBaseException(Exception):
@@ -84,11 +88,13 @@ class MissingKeywordsError(_KeywordsBaseException):
 
 
 class InvalidParametersError(_KeywordsBaseException):
-    """Raised when Parameters were positional arguments without defaults or keyword arguments"""
+    """Raised when Parameters were positional arguments without defaults or
+    keyword arguments"""
 
     def __init__(self, keywords: set[str], *args: Any) -> None:
-        """initializes invalid keywords, deprecated parameters should not be positional arguments
-        as that would defeat the purpose of deprecating a function's parameters."""
+        """initializes invalid keywords, deprecated parameters should not be
+        positional arguments as that would defeat the purpose of deprecating a
+        function's parameters."""
         super().__init__(
             keywords,
             f"Arguments :{list(keywords)!r} should not be positional",
@@ -143,8 +149,9 @@ class deprecated_params(metaclass=Final):
     while writing and editing code.
     """
 
-    # __slots__ was an optimization since subclassing deprecated_params was disabled
-    # if you want a more simplified version of this class object throw me an issue on github - Vizonex.
+    # __slots__ was an optimization since subclassing deprecated_params was
+    # disabled if you want a more simplified version of this class object
+    # throw me an issue on github - Vizonex.
 
     __slots__ = (
         "_params",
@@ -179,26 +186,34 @@ class deprecated_params(metaclass=Final):
         """
         Initializes deprecated parameters to pass along to different functions
 
-        :param params: A Sequence of keyword parameters of single keyword parameter to deprecate and warn the removal of.
-        :param message: A single message for to assign to each parameter to be deprecated otherwise
-            you can deprecate multiple under different reasons::
+        :param params: A Sequence of keyword parameters of single keyword
+            parameter to deprecate and warn the removal of.
+        :param message:
+            A single message for to assign to each parameter to be deprecated
+            otherwise you can deprecate multiple under different reasons::
 
                 @deprecated_params(
                     ['mispel', 'x'],
                     message={
-                        'mispel': 'mispel was deprecated due to misspelling the word',
+                        'mispel': 'misspells the word misspelling',
                         'x':'you get the idea...'
                     }
                 )
-                def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
+                def mispelled_func(misspelling = None, *, mispel:str, x:int):
+                    ...
 
-        :param category: Used to warrant a custom warning category if required or needed to specify what
-            Deprecation warning should appear.
+        :param category: Used to warrant a custom warning category if required
+            or needed to specify what Deprecation warning should appear.
         :param stacklevel: What level should this wanring appear at? Default: 1
-        :param default_message: When a parameter doesn't have a warning message try using this message instead
-        :param display_kw: Displays which parameter is deprecated in the warning message under `Parameter "%s" ...`
+        :param default_message:
+            When a parameter doesn't have a
+            warning message try using this message instead
+        :param display_kw: Displays which parameter is
+            deprecated in the warning message under `Parameter "%s" ...`
             followed by the rest of the message
-        :param removed_in: Displays which version of your library's program will remove this keyword parameter in::
+        :param removed_in:
+            Displays which version of your library's program will
+            remove this keyword parameter in::
 
                 @deprecated_params(
                     ['mispel', 'x'],
@@ -208,15 +223,18 @@ class deprecated_params(metaclass=Final):
                     } # sequences of numbers are also allowed if preferred.
                 )
 
-                def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
+                def mispelled_func(misspelling = None, *, mispel:str, x:int):
+                    ...
 
-            you can also say that all parameters will be removed in one version::
+            you can also say that all parameters will be removed in one version
+            ::
 
                 @deprecated_params(
                     ['mispel', 'x'],
                     removed_in='0.1.5' # or (0, 1, 5)
                 )
-                def mispelled_func(misspelling = None, *, mispel:str, x:int): ...
+                def mispelled_func(misspelling = None, *, mispel:str, x:int):
+                    ...
 
 
         """
@@ -224,7 +242,8 @@ class deprecated_params(metaclass=Final):
             raise ValueError(f"params should not be empty got {params!r}")
         if not isinstance(message, (str, dict, Mapping)):
             raise TypeError(
-                f"Expected an object of type str or dict or Mappable type for 'message', not {type(message).__name__!r}"
+                f"Expected an object of type str or dict or Mappable type for"
+                f"'message', not {type(message).__name__!r}"
             )
 
         self._params = (
@@ -240,17 +259,19 @@ class deprecated_params(metaclass=Final):
 
         if removed_in:
             if isinstance(removed_in, (dict, Mapping)):
-                # Some people might be more comfortable giving versions in tuples or lists.
+                # Some people might be more comfortable giving versions in
+                # tuples or lists.
                 self._removed_in = convert_removed_in_sequences(removed_in)
             else:
-                # single removed version meaning that all parameters will be removed in this version
+                # single removed version meaning that all parameters will be
+                # removed in this version
                 ver = join_version_if_sequence(removed_in)
                 self._removed_in = {k: ver for k in params}
         else:
             self._removed_in = {}
 
-        # Preloaded previews of all warning messages new in deprecated-params 0.1.8 for extra speed
-        # upon loading the message
+        # Preloaded previews of all warning messages new in deprecated-params
+        # 0.1.8 for extra speed upon loading the message
         self._warning_messages: dict[str, str] = {
             p: self.__write_warning(p) for p in self._params
         }
@@ -284,8 +305,8 @@ class deprecated_params(metaclass=Final):
 
             # Check if were keyword only or aren't carrying a default param
             if p.kind != KEYWORD_ONLY:
-                # Anything this isn't a keyword should be considered as deprecated
-                # as were still technically using it.
+                # Anything this isn't a keyword should be considered as
+                # deprecated as were still technically using it.
                 invalid_params.add(p.name)
 
             if not skip_missing:
@@ -389,8 +410,10 @@ class deprecated_params(metaclass=Final):
             arg.__new__.__deprecated_params__ = self._warning_messages.copy()  # type: ignore
 
             original_init_subclass = arg.__init_subclass__
-            # Python Comment: We need slightly different behavior if __init_subclass__
-            # is a bound method (likely if it was implemented in Python)
+
+            # Python Comment: We need slightly different behavior
+            # if __init_subclass__ is a bound method
+            # (likely if it was implemented in Python)
             if isinstance(original_init_subclass, MethodType):
                 self.__check_for_missing_kwds(
                     original_init_subclass,
@@ -413,8 +436,8 @@ class deprecated_params(metaclass=Final):
                     self._warning_messages.copy()
                 )
 
-            # Python Comment: Or otherwise, which likely means it's a builtin such as
-            # object's implementation of __init_subclass__.
+            # Python Comment: Or otherwise, which likely means it's a builtin
+            # such as object's implementation of __init_subclass__.
             else:
 
                 @wraps(original_init_subclass)
@@ -449,6 +472,7 @@ class deprecated_params(metaclass=Final):
 
         else:
             raise TypeError(
-                "@deprecated_params decorator with non-None category must be applied to "
+                "@deprecated_params decorator with non-None category must be "
+                "applied to "
                 f"a class or callable, not {arg!r}"
             )

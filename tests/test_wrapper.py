@@ -1,8 +1,10 @@
-import pytest
-from typing import Optional
-from deprecated_params import deprecated_params
 import sys
 import warnings
+from typing import Optional
+
+import pytest
+
+from deprecated_params import deprecated_params
 
 
 # should carry w x y

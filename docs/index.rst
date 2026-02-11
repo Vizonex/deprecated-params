@@ -9,12 +9,13 @@ deprecated-params documentation
 Based off python's `warnings.deprecated(...)` wrapper `PEP 702 <https://peps.python.org/pep-0702/>`_
 
 **deprecated-params** was made for solving the problems of warning users that certain parameters will
-not be used anymore and that better ones exist. **deprecated-params** was made with the intent of being.
-Tiny, easy to use & disposable later from any python library. Although libraries that may be similar to this 
-one do exist it was my goal to give a simplsitic name for install with a simplsitic interface. 
-3 of my own libraries either have already used it and been removed after deprecation or currently have it inplace.
+not be used anymore and that better ones exist. The library's intent is to be lazy yet readable,
+tiny, easy to use & disposable later from any python library as it's aim is to be used temporarily until no longer required. 
+Although libraries may have similar characteristics to this one, it was my goal to give a simplsitic package name with a simplsitic 
+interface meant to be something small and easy to maintain over longer periods of time and hopes to be maintainable for many 
+years to come. I have used it with my other pypi packages that I maintain already or it stilly currently has this library it inplace.
 **deprecated-params** should retain typehinting at all-times and should be able to retain type typehints of 
-anything you can wrap to a function under the sun including 
+anything you can wrap to any function or class under the sun including 
 functions like ``__init__``, ``__init_subclass__`` & ``__new__`` all of which will retain Parameter data with ides 
 such as **Visual-Studio-Code**, **PyCharm** and many more.
 
