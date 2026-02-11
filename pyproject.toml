@@ -19,7 +19,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 
-# I added some shortcuts incase needed.
+# I added some shortcuts in case needed.
 [project.optional-dependencies]
 pytest=[
     "pytest>=9.0.2"
