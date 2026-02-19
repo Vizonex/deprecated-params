@@ -28,7 +28,7 @@ from typing import (
     overload,
 )
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -43,9 +43,6 @@ __all__ = (
     "MissingKeywordsError",
     "InvalidParametersError",
     "deprecated_params",
-    "__author__",
-    "__license__",
-    "__version__",
 )
 
 # Word of Warning:
@@ -116,7 +113,7 @@ def convert_removed_in_sequences(
 # I made a few adjustments...
 
 
-class Final(type):
+class FinalMeta(type):
     def __new__(
         cls: type[_T],
         name: str,
@@ -126,7 +123,7 @@ class Final(type):
         **kwds: Any,
     ) -> _T:
         for b in bases:
-            if isinstance(b, Final):
+            if isinstance(b, FinalMeta):
                 raise TypeError(
                     "type '{0}' cannot be subclassed further".format(
                         b.__name__
@@ -136,7 +133,7 @@ class Final(type):
 
 
 @final
-class deprecated_params(metaclass=Final):
+class deprecated_params(metaclass=FinalMeta):
     """
     A Wrapper inspired by python's wrapper deprecated from 3.13
     and is used to deprecate parameters.
