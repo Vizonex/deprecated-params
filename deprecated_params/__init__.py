@@ -2,7 +2,7 @@
 Deprecated Params
 -----------------
 
-A Library dedicated to warning users about keyword parameters
+A Library for to warning users about keyword parameters
 being removed or changed::
 
     from deprecated_params import deprecated_params
