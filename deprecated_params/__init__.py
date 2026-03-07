@@ -136,7 +136,7 @@ class FinalMeta(type):
 class deprecated_params(metaclass=FinalMeta):
     """
     A Wrapper inspired by python's wrapper deprecated from 3.13
-    and is used to deprecate parameters.
+    used to for deprecating a function's parameters.
 
     .. versionchanged:: 0.1.8
         this wrapper also passes along an attribute
