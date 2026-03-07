@@ -18,7 +18,7 @@ import inspect
 import sys
 import warnings
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from functools import wraps
+from functools import cache, wraps
 from types import MethodType
 from typing import (
     Any,
@@ -28,7 +28,7 @@ from typing import (
     overload,
 )
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -56,7 +56,7 @@ __all__ = (
 class _KeywordsBaseException(Exception):
     __slots__ = "_keywords"
 
-    def __init__(self, keywords: set[str], *args: Any) -> None:
+    def __init__(self, keywords: Sequence[str], *args: Any) -> None:
         self._keywords = frozenset(keywords)
         super().__init__(*args)
 
@@ -75,7 +75,7 @@ class _KeywordsBaseException(Exception):
 class MissingKeywordsError(_KeywordsBaseException):
     """Raised when Missing a keyword for an argument"""
 
-    def __init__(self, keywords: set[str], *args: Any) -> None:
+    def __init__(self, keywords: Sequence[str], *args: Any) -> None:
         """Initializes missing keywords"""
         super().__init__(
             keywords,
@@ -88,7 +88,7 @@ class InvalidParametersError(_KeywordsBaseException):
     """Raised when Parameters were positional arguments without defaults or
     keyword arguments"""
 
-    def __init__(self, keywords: set[str], *args: Any) -> None:
+    def __init__(self, keywords: Sequence[str], *args: Any) -> None:
         """initializes invalid keywords, deprecated parameters should not be
         positional arguments as that would defeat the purpose of deprecating a
         function's parameters."""
@@ -98,11 +98,11 @@ class InvalidParametersError(_KeywordsBaseException):
             *args,
         )
 
-
+@cache
 def join_version_if_sequence(ver: str | Sequence[int]) -> str:
     return ".".join(map(str, ver)) if not isinstance(ver, str) else ver
 
-
+@cache
 def convert_removed_in_sequences(
     removed_in: Mapping[str, str | Sequence[int]],
 ) -> dict[str, str]:
@@ -138,12 +138,13 @@ class deprecated_params(metaclass=FinalMeta):
     A Wrapper inspired by python's wrapper deprecated from 3.13
     and is used to deprecate parameters.
 
-    Since version 0.1.8 this wrapper also passes along an attribute
-    called `__deprecated_params__` with a dictionary of all the
-    preloaded deprecation warnings to each given parameter. Ides
-    such as VSCode, Pycharm and more could theoretically utilize
-    `__deprecated_params__` elsewhere help to assist users and developers
-    while writing and editing code.
+    .. versionchanged:: 0.1.8
+        this wrapper also passes along an attribute
+        called `__deprecated_params__` with a dictionary of all the
+        preloaded deprecation warnings to each given parameter. Ides
+        such as VSCode, Pycharm and more could theoretically utilize
+        `__deprecated_params__` elsewhere help to assist users and
+        developers while writing and editing code.
     """
 
     # __slots__ was an optimization since subclassing deprecated_params was
@@ -161,6 +162,14 @@ class deprecated_params(metaclass=FinalMeta):
         "_removed_in",
         "_warning_messages",
     )
+
+    # TODO: A fix to the current documentation would be nice
+    # SEE: https://github.com/aio-libs/aiohttp-theme/issues/102
+
+    # Currently we document `__init__` directly in sphinx format to
+    # allow Vscode's pyright tool to cleanly read it when the mouse
+    # hovers over a certain word or parameter which can be extermely
+    # helpful.
 
     def __init__(
         self,
@@ -223,8 +232,8 @@ class deprecated_params(metaclass=FinalMeta):
                 def mispelled_func(misspelling = None, *, mispel:str, x:int):
                     ...
 
-            you can also say that all parameters will be removed in one version
-            ::
+            you can also say that all parameters will be removed in one
+            version::
 
                 @deprecated_params(
                     ['mispel', 'x'],
@@ -244,7 +253,7 @@ class deprecated_params(metaclass=FinalMeta):
             )
 
         self._params = (
-            set(params) if not isinstance(params, str) else set([params])
+            set(params) if not isinstance(params, str) else set((params,))
         )
 
         self._message = message or "is deprecated"
@@ -296,8 +305,7 @@ class deprecated_params(metaclass=FinalMeta):
             if not allow_miss:
                 p = sig.parameters[m]
             else:
-                p = sig.parameters.get(m)  # type: ignore
-                if p is None:
+                if (p := sig.parameters.get(m)) is None: # type: ignore
                     continue
 
             # Check if were keyword only or aren't carrying a default param
@@ -333,7 +341,7 @@ class deprecated_params(metaclass=FinalMeta):
     def __write_warning(self, kw_name: str) -> str:
         msg = ""
         if self._display_kw:
-            msg += 'Parameter "%s" ' % kw_name
+            msg += f'Parameter "{kw_name}" '
 
         if self._message_is_dict:
             msg += self._message.get(kw_name, self._default_message)  # type: ignore
@@ -342,9 +350,7 @@ class deprecated_params(metaclass=FinalMeta):
 
         if self._removed_in:
             if kw_removed_in := self._removed_in.get(kw_name):
-                msg += " [Removed In: "
-                msg += kw_removed_in
-                msg += "]"
+                msg += f" [Removed In: {kw_removed_in}]"
 
         return msg
 
