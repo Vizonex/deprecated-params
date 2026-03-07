@@ -56,7 +56,7 @@ __all__ = (
 class _KeywordsBaseException(Exception):
     __slots__ = "_keywords"
 
-    def __init__(self, keywords: Sequence[str], *args: Any) -> None:
+    def __init__(self, keywords: set[str], *args: Any) -> None:
         self._keywords = frozenset(keywords)
         super().__init__(*args)
 
@@ -75,7 +75,7 @@ class _KeywordsBaseException(Exception):
 class MissingKeywordsError(_KeywordsBaseException):
     """Raised when Missing a keyword for an argument"""
 
-    def __init__(self, keywords: Sequence[str], *args: Any) -> None:
+    def __init__(self, keywords: set[str], *args: Any) -> None:
         """Initializes missing keywords"""
         super().__init__(
             keywords,
@@ -88,7 +88,7 @@ class InvalidParametersError(_KeywordsBaseException):
     """Raised when Parameters were positional arguments without defaults or
     keyword arguments"""
 
-    def __init__(self, keywords: Sequence[str], *args: Any) -> None:
+    def __init__(self, keywords: set[str], *args: Any) -> None:
         """initializes invalid keywords, deprecated parameters should not be
         positional arguments as that would defeat the purpose of deprecating a
         function's parameters."""
@@ -98,9 +98,11 @@ class InvalidParametersError(_KeywordsBaseException):
             *args,
         )
 
+
 @cache
 def join_version_if_sequence(ver: str | Sequence[int]) -> str:
     return ".".join(map(str, ver)) if not isinstance(ver, str) else ver
+
 
 @cache
 def convert_removed_in_sequences(
@@ -168,7 +170,7 @@ class deprecated_params(metaclass=FinalMeta):
 
     # Currently we document `__init__` directly in sphinx format to
     # allow Vscode's pyright tool to cleanly read it when the mouse
-    # hovers over a certain word or parameter which can be extermely
+    # hovers over a certain word or parameter which can be extremely
     # helpful.
 
     def __init__(
@@ -304,9 +306,8 @@ class deprecated_params(metaclass=FinalMeta):
         for m in self._params:
             if not allow_miss:
                 p = sig.parameters[m]
-            else:
-                if (p := sig.parameters.get(m)) is None: # type: ignore
-                    continue
+            elif (p := sig.parameters.get(m)) is None:  # type: ignore
+                continue
 
             # Check if were keyword only or aren't carrying a default param
             if p.kind != KEYWORD_ONLY:
