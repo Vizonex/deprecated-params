@@ -18,7 +18,7 @@ import inspect
 import sys
 import warnings
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from functools import cache, wraps
+from functools import wraps
 from types import MethodType
 from typing import (
     Any,
@@ -99,12 +99,10 @@ class InvalidParametersError(_KeywordsBaseException):
         )
 
 
-@cache
 def join_version_if_sequence(ver: str | Sequence[int]) -> str:
     return ".".join(map(str, ver)) if not isinstance(ver, str) else ver
 
 
-@cache
 def convert_removed_in_sequences(
     removed_in: Mapping[str, str | Sequence[int]],
 ) -> dict[str, str]:
