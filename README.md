@@ -55,5 +55,5 @@ looking for didn't exist I took the opportunity to implement it.
 ## Goals With this library
 - Keep up to date and maintained until sometime around __2040__ or when something new obsoletes the need for it
   - Example: If the standard python library were to introduce it's own adaptation of `deprecated-params`
-- Remain tiny or as a single module with no additional dependencies unless needed for backwards compatable versions of python example: `typing-extensions`.
+- Remain tiny or as a single module with no additional dependencies unless needed for backwards compatible versions of python example: `typing-extensions`.
 
