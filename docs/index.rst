@@ -27,7 +27,7 @@ It will remain maintained **until around 2040** or until something better comes 
 as the python standard library adopting it's own version of this library making the use of this 
 library with newer versions of python obsolete. 
 
-Even if AI takes over it will attempt to reamin written, developed and maintained 
+Even if AI takes over it will attempt to remain written, developed and maintained 
 by a human with the goal of remaining AI-Free software as a work of art.
 
 
