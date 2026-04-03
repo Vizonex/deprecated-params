@@ -3,6 +3,7 @@
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/deprecated-params)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![License: Appache-2.0](https://img.shields.io/badge/License-Appache-yellow.svg)](https://opensource.org/licenses/Appache-2-0)
+[![NO AI](https://raw.githubusercontent.com/nuxy/no-ai-badge/master/badge.svg)](https://github.com/nuxy/no-ai-badge)   
 
 
 Inspired after python's warning.deprecated wrapper, deprecated_params is made to serve the single purpose of deprecating parameter names to warn users
@@ -54,5 +55,5 @@ looking for didn't exist I took the opportunity to implement it.
 ## Goals With this library
 - Keep up to date and maintained until sometime around __2040__ or when something new obsoletes the need for it
   - Example: If the standard python library were to introduce it's own adaptation of `deprecated-params`
-- Remain tiny or as a single module with no additonal dependencies unless needed for backwards compatable versions of python example: `typing-extensions`.
+- Remain tiny or as a single module with no additional dependencies unless needed for backwards compatible versions of python example: `typing-extensions`.
 
