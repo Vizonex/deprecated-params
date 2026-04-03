@@ -56,4 +56,6 @@ looking for didn't exist I took the opportunity to implement it.
 - Keep up to date and maintained until sometime around __2040__ or when something new obsoletes the need for it
   - Example: If the standard python library were to introduce it's own adaptation of `deprecated-params`
 - Remain tiny or as a single module with no additional dependencies unless needed for backwards compatible versions of python example: `typing-extensions`.
-
+- **This library makes the promise that it will Never Vibe Coded**. It is simplistic enough for anybody 
+with a decent understanding of python to understand the underlying mechanics behind how the classes and functions work.
+Under this philosphy, AI will never be relied on and will continue to remain human-made & maintained for the rest of time.
