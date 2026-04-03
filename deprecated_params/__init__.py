@@ -10,6 +10,14 @@ being removed or changed::
     @deprecated_params(['x'])
     def func(y, *, x:int = 0):
         pass
+
+It will remain maintained **until around 2040** or until something better comes
+along such as the python standard library adopting it's own version of this
+library making the use of this library with newer versions of python obsolete.
+
+Even if AI takes over it will attempt to reamin written, developed and
+maintained by a human with the goal of remaining AI-Free software as
+a work of art.
 """
 
 from __future__ import annotations
@@ -28,7 +36,7 @@ from typing import (
     overload,
 )
 
-__version__ = "0.5.2"
+__version__ = "0.6.0"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -45,12 +53,12 @@ __all__ = (
     "deprecated_params",
 )
 
-# Word of Warning:
+# Word of Warning: This library is dual licensed.
 # All functions marked with underscores should be treated as do not use
 # directly. If you want these parts of code, they are under an MIT License and
 # you are allowed to copy and paste them freely as long as it's not apart of
-# python's warnings.deprecated function which then you will need to license
-# under an APACHE 2.0
+# python's warnings.deprecated function, if it's used under that case, then you
+# will need to license your project under an APACHE 2.0.
 
 
 class _KeywordsBaseException(Exception):
@@ -292,8 +300,8 @@ class deprecated_params(metaclass=FinalMeta):
     ) -> tuple[set[str], set[str], bool]:
         sig = inspect.signature(fn)
 
-        missing = missing if missing is not None else set(self._params)
-        invalid_params = set() if invalid_params is None else invalid_params
+        missing = self._params.copy() if missing is None else missing
+        invalid_params = invalid_params or set()
 
         skip_missing = (
             any([p.kind == VAR_KEYWORD for p in sig.parameters.values()])
@@ -309,8 +317,9 @@ class deprecated_params(metaclass=FinalMeta):
 
             # Check if were keyword only or aren't carrying a default param
             if p.kind != KEYWORD_ONLY:
-                # Anything this isn't a keyword should be considered as
-                # deprecated as were still technically using it.
+                # Anything this isn't a keyword shouldn't be considered as
+                # deprecated as it's still in use, not doing so defeats
+                # the purpose of using it.
                 invalid_params.add(p.name)
 
             if not skip_missing:
@@ -334,7 +343,7 @@ class deprecated_params(metaclass=FinalMeta):
         if invalid_params:
             raise InvalidParametersError(invalid_params)
 
-        if missing and not skip_missing:
+        elif missing and not skip_missing:
             raise MissingKeywordsError(missing)
 
     def __write_warning(self, kw_name: str) -> str:
