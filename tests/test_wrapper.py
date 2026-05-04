@@ -1,6 +1,5 @@
 import sys
 import warnings
-from typing import Optional
 
 import pytest
 
@@ -82,7 +81,7 @@ def test_deprecated_param_repeat_twice() -> None:
 def test_class_wrapper_and_kw_display_disabled() -> None:
     @deprecated_params(["foo"], "foo is deprecated", display_kw=False)
     class MyClass:
-        def __init__(self, spam: str, *, foo: Optional[str] = None):
+        def __init__(self, spam: str, *, foo: str | None = None):
             self.spam = spam
             self.foo = foo
 
@@ -97,7 +96,7 @@ def test_class_wrapper_and_kw_display_disabled() -> None:
 def test_class_wrapper_and_kw_display_disabled_one_param() -> None:
     @deprecated_params("foo", "foo is deprecated", display_kw=False)
     class MyClass:
-        def __init__(self, spam: str, *, foo: Optional[str] = None):
+        def __init__(self, spam: str, *, foo: str | None = None):
             self.spam = spam
             self.foo = foo
 
@@ -126,8 +125,8 @@ def test_dataclasses_with_wrapper_message_dicts_custom_warning() -> None:
     )
     @dataclass
     class Class:
-        foo: Optional[str] = field(kw_only=True, default=None)
-        spam: Optional[str] = field(kw_only=True, default=None)
+        foo: str | None = field(kw_only=True, default=None)
+        spam: str | None = field(kw_only=True, default=None)
 
     with pytest.warns(TornadoWarning, match="got foo"):
         Class(foo="foo")
