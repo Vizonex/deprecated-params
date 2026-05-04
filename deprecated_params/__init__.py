@@ -133,9 +133,7 @@ class FinalMeta(type):
         for b in bases:
             if isinstance(b, FinalMeta):
                 raise TypeError(
-                    "type '{0}' cannot be subclassed further".format(
-                        b.__name__
-                    )
+                    f"type '{b.__name__}' cannot be subclassed further"
                 )
         return type.__new__(cls, name, bases, dict(classdict), **kwds)
 
