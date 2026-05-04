@@ -44,8 +44,6 @@ select = [
     "E",
     "W",
     "I",
-    "F"
-]
-ignore = [
-    "F405" # may be undefined, or defined from star imports (I Need these)
+    "F",
+    "UP",
 ]
