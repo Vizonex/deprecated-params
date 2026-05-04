@@ -36,7 +36,7 @@ from typing import (
     overload,
 )
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
