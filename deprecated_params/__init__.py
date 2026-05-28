@@ -27,7 +27,7 @@ import sys
 import warnings
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from functools import wraps
-from types import MethodType
+from types import MappingProxyType, MethodType
 from typing import (
     Any,
     ParamSpec,
@@ -36,7 +36,7 @@ from typing import (
     overload,
 )
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -151,6 +151,12 @@ class deprecated_params(metaclass=FinalMeta):
         such as VSCode, Pycharm and more could theoretically utilize
         `__deprecated_params__` elsewhere help to assist users and
         developers while writing and editing code.
+
+    .. versionchanged:: 0.8.0
+        `__deprecated_params__` now uses an immutable dictionary
+        called :class:`MappingProxyType` to prevent needing to copy
+        everything.
+
     """
 
     # __slots__ was an optimization since subclassing deprecated_params was
@@ -270,7 +276,7 @@ class deprecated_params(metaclass=FinalMeta):
         self._default_message = default_message or "do not use"
 
         if removed_in:
-            if isinstance(removed_in, (dict, Mapping)):
+            if isinstance(removed_in, Mapping):
                 # Some people might be more comfortable giving versions in
                 # tuples or lists.
                 self._removed_in = convert_removed_in_sequences(removed_in)
@@ -284,9 +290,12 @@ class deprecated_params(metaclass=FinalMeta):
 
         # Preloaded previews of all warning messages new in deprecated-params
         # 0.1.8 for extra speed upon loading the message
-        self._warning_messages: dict[str, str] = {
-            p: self.__write_warning(p) for p in self._params
-        }
+
+        # New in 0.8.0, _warning messages are now immutable which means they
+        # No longer need copying.
+        self._warning_messages: MappingProxyType[str, str] = MappingProxyType(
+            {p: self.__write_warning(p) for p in self._params}
+        )
 
     def __check_with_missing(
         self,
@@ -296,21 +305,23 @@ class deprecated_params(metaclass=FinalMeta):
         skip_missing: bool | None = None,
         allow_miss: bool = False,
     ) -> tuple[set[str], set[str], bool]:
-        sig = inspect.signature(fn)
+        params = self._params
+        parameters = inspect.signature(fn).parameters
 
-        missing = self._params.copy() if missing is None else missing
+        if missing is None:
+            missing = params.copy()
+
         invalid_params = invalid_params or set()
 
-        skip_missing = (
-            any([p.kind == VAR_KEYWORD for p in sig.parameters.values()])
-            if skip_missing is None
-            else skip_missing
-        )
+        if skip_missing is None:
+            skip_missing = any(
+                [p.kind == VAR_KEYWORD for p in parameters.values()]
+            )
 
-        for m in self._params:
+        for m in params:
             if not allow_miss:
-                p = sig.parameters[m]
-            elif (p := sig.parameters.get(m)) is None:  # type: ignore
+                p = parameters[m]
+            elif (p := parameters.get(m)) is None:  # type: ignore
                 continue
 
             # Check if were keyword only or aren't carrying a default param
@@ -354,9 +365,8 @@ class deprecated_params(metaclass=FinalMeta):
         else:
             msg += self._message  # type: ignore
 
-        if self._removed_in:
-            if kw_removed_in := self._removed_in.get(kw_name):
-                msg += f" [Removed In: {kw_removed_in}]"
+        if kw_removed_in := self._removed_in.get(kw_name):
+            msg += f" [Removed In: {kw_removed_in}]"
 
         return msg
 
@@ -382,8 +392,9 @@ class deprecated_params(metaclass=FinalMeta):
         self, arg: type[_T] | Callable[_P, _T]
     ) -> type[_T] | Callable[_P, _T]:
         def check_kw_arguments(kw: dict[str, Any]) -> None:
-            for k in self._params.intersection(kw.keys()):
-                self.__warn(k, arg)
+            warn = self.__warn
+            for k in self._params.intersection(kw):
+                warn(k, arg)
 
         if isinstance(arg, type):
             # NOTE: Combining init and new together is done to
@@ -416,7 +427,7 @@ class deprecated_params(metaclass=FinalMeta):
                     return original_new(cls)
 
             arg.__new__ = staticmethod(__new__)  # type: ignore
-            arg.__new__.__deprecated_params__ = self._warning_messages.copy()  # type: ignore
+            arg.__new__.__deprecated_params__ = self._warning_messages  # type: ignore
 
             original_init_subclass = arg.__init_subclass__
 
@@ -442,7 +453,7 @@ class deprecated_params(metaclass=FinalMeta):
 
                 arg.__init_subclass__ = classmethod(__init_subclass__)  # type: ignore
                 arg.__init_subclass__.__deprecated_params__ = (  # type: ignore[attr-defined]
-                    self._warning_messages.copy()
+                    self._warning_messages
                 )
 
             # Python Comment: Or otherwise, which likely means it's a builtin
@@ -458,7 +469,7 @@ class deprecated_params(metaclass=FinalMeta):
 
                 arg.__init_subclass__ = __init_subclass__  # type: ignore
                 arg.__init_subclass__.__deprecated_params__ = (  # type: ignore[attr-defined]
-                    self._warning_messages.copy()
+                    self._warning_messages
                 )
             return arg
 
@@ -476,7 +487,7 @@ class deprecated_params(metaclass=FinalMeta):
                     wrapper = inspect.markcoroutinefunction(wrapper)
 
             # Wrapper now contains a shadow copy of deprecated parameters
-            wrapper.__deprecated_params__ = self._warning_messages.copy()  # type: ignore
+            wrapper.__deprecated_params__ = self._warning_messages  # type: ignore
             return wrapper
 
         else:
