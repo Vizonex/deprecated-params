@@ -36,7 +36,7 @@ from typing import (
     overload,
 )
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 __license__ = "Apache 2.0 / MIT"
 __author__ = "Vizonex"
 
@@ -48,8 +48,8 @@ VAR_KEYWORD = inspect.Parameter.VAR_KEYWORD
 
 
 __all__ = (
-    "MissingKeywordsError",
     "InvalidParametersError",
+    "MissingKeywordsError",
     "deprecated_params",
 )
 
@@ -62,7 +62,7 @@ __all__ = (
 
 
 class _KeywordsBaseException(Exception):
-    __slots__ = "_keywords"
+    __slots__ = ("__weakref__", "_keywords")
 
     def __init__(self, keywords: set[str], *args: Any) -> None:
         self._keywords = frozenset(keywords)
@@ -164,14 +164,15 @@ class deprecated_params(metaclass=FinalMeta):
     # throw me an issue on github - Vizonex.
 
     __slots__ = (
-        "_params",
+        "__weakref__",
+        "_category",
+        "_default_message",
+        "_display_kw",
         "_message",
         "_message_is_dict",
-        "_display_kw",
-        "_category",
-        "_stacklevel",
-        "_default_message",
+        "_params",
         "_removed_in",
+        "_stacklevel",
         "_warning_messages",
     )
 

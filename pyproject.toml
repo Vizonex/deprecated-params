@@ -46,4 +46,5 @@ select = [
     "I",
     "F",
     "UP",
+    "RUF"
 ]
