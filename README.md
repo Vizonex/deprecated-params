@@ -9,7 +9,10 @@
 Inspired after python's warning.deprecated wrapper, deprecated_params is made to serve the single purpose of deprecating parameter names to warn users
 about incoming changes as well as retaining typehinting.
 
-
+## How to install deprecated-params
+```
+pip install deprecated-params
+```
 
 ## How to Deprecate Parameters
 Parameters should be keyword arguments, not positional, Reason
