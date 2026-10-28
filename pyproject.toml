@@ -8,7 +8,7 @@ authors = [
     { name = "Vizonex", email="VizonexBusiness@gmail.com"},
 ]
 license = "MIT"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 [tool.setuptools.dynamic]
 version = {attr = "deprecated_params.__version__"}
 

@@ -38,7 +38,7 @@ Installation
 
    $ pip install deprecated-params
 
-The library requires Python 3.9 or newer.
+The library requires Python 3.11 or newer.
 
 API
 ---
