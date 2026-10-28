@@ -1,4 +1,3 @@
-import sys
 import warnings
 
 import pytest
@@ -113,7 +112,6 @@ class TornadoWarning(DeprecationWarning):
     pass
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="kw_only not on 3.9")
 def test_dataclasses_with_wrapper_message_dicts_custom_warning() -> None:
     from dataclasses import dataclass, field
 

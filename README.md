@@ -29,20 +29,26 @@ likely be one of 3 cases.
 ```python
 from deprecated_params import deprecated_params
 
-@deprecated_params(['x'])
-def func(y, *, x:int = 0):
+
+@deprecated_params(["x"])
+def func(y, *, x: int = 0):
     pass
+
 
 # DeprecationWarning: Parameter "x" is deprecated
 func(None, x=20)
 
-# NOTE: **kw is accepted but also you could put down more than one 
+
+# NOTE: **kw is accepted but also you could put down more than one
 # parameter if needed...
-@deprecated_params(['foo'], {"foo":"foo was removed in ... don't use it"}, display_kw=False)
+@deprecated_params(
+    ["foo"], {"foo": "foo was removed in ... don't use it"}, display_kw=False
+)
 class MyClass:
-    def __init__(self, spam:object, **kw):
+    def __init__(self, spam: object, **kw):
         self.spam = spam
         self.foo = kw.get("foo", None)
+
 
 # DeprecationWarning: foo was removed in ... don't use it
 mc = MyClass("spam", foo="X")
